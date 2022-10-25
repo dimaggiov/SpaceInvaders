@@ -3,6 +3,8 @@
 #include<GL/glew.h>
 #include<GLFW/glfw3.h>
 #include "Buffer.h"
+#include "Game.h"
+#include "SpriteAnimation.h"
 
 
 
@@ -48,6 +50,8 @@ int main() {
 	const size_t buffer_height = 256;
 	const size_t alien_width = 11;
 	const size_t alien_height = 8;
+	const size_t player_width = 11;
+	const size_t player_height = 7;
 
 	glfwSetErrorCallback(error_callback);
 
@@ -183,8 +187,8 @@ int main() {
 	glBindVertexArray(fullScreenVAO);
 
 	//create sprites
-	Sprite *alienSprite = new Sprite(alien_width, alien_height);
-	alienSprite->setData(new uint8_t[11 * 8]
+	Sprite *alienSprite1 = new Sprite(alien_width, alien_height);
+	alienSprite1->setData(new uint8_t[alien_width * alien_height]
 		{
 			0,0,1,0,0,0,0,0,1,0,0, // ..@.....@..
 			0,0,0,1,0,0,0,1,0,0,0, // ...@...@...
@@ -195,15 +199,86 @@ int main() {
 			1,0,1,0,0,0,0,0,1,0,1, // @.@.....@.@
 			0,0,0,1,1,0,1,1,0,0,0  // ...@@.@@...
 		});
+
+	Sprite* alienSprite2 = new Sprite(alien_width, alien_height);
+	alienSprite2->setData(new uint8_t[alien_width * alien_height]
+		{
+			0,0,1,0,0,0,0,0,1,0,0, // ..@.....@..
+			1,0,0,1,0,0,0,1,0,0,1, // @..@...@..@
+			1,0,1,1,1,1,1,1,1,0,1, // @.@@@@@@@.@
+			1,1,1,0,1,1,1,0,1,1,1, // @@@.@@@.@@@
+			1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
+			0,1,1,1,1,1,1,1,1,1,0, // .@@@@@@@@@.
+			0,0,1,0,0,0,0,0,1,0,0, // ..@.....@..
+			0,1,0,0,0,0,0,0,0,1,0  // .@.......@.
+		}
+	);
+
+
+	Sprite* playerSprite = new Sprite(player_width, player_height);
+	playerSprite->setData(new uint8_t[player_width * player_height]
+		{
+			0,0,0,0,0,1,0,0,0,0,0, // .....@.....
+			0,0,0,0,1,1,1,0,0,0,0, // ....@@@....
+			0,0,0,0,1,1,1,0,0,0,0, // ....@@@....
+			0,1,1,1,1,1,1,1,1,1,0, // .@@@@@@@@@.
+			1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
+			1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
+			1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
+		}
+	);
+
+	//Create animations
+	Sprite** alienFrames = new Sprite * [2];
+	alienFrames[0] = alienSprite1;
+	alienFrames[1] = alienSprite2;
+
+	SpriteAnimation* alienAnimation = new SpriteAnimation(2, 10, 0, alienFrames);
 	
 
+	//Create game
+	Game* game = new Game(buffer_width, buffer_height, 55);
+
+	glfwSwapInterval(2);
+
 	//game loop
+	//const int target_fps = 30;
+	//double lasttime = glfw()
+	int playerMovementDirection = 1;
 	while (!glfwWindowShouldClose(window)) 
 	{
 		buffer->clearBuffer(standardColor);
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		buffer->drawSprite(*alienSprite, 112, 128, Buffer::rgb_to_uint(128, 0, 0));
+
+
+		//Draw aliens
+		for (size_t ai = 0; ai < game->getNumAliens(); ai++)
+		{
+			Alien* alien = game->getAlien(ai);
+			size_t currentFrame = alienAnimation->getTime() / alienAnimation->getFrameDuration();
+			Sprite* spriteToDraw = alienAnimation->getFrames()[currentFrame];
+			buffer->drawSprite(*spriteToDraw, alien->getX(), alien->getY(), Buffer::rgb_to_uint(128, 0, 0));
+		}
+
+
+		
+		//move player back and forth
+		if (game->getPlayerX() + playerSprite->getWidth() + playerMovementDirection >= game->getWidth() - 1)
+		{
+			game->setPlayerX(game->getWidth() - playerSprite->getWidth() - playerMovementDirection - 1);
+			playerMovementDirection *= -1;
+		}
+		else if ((int)game->getPlayerX() + playerMovementDirection <= 0)
+		{
+			game->setPlayerX(0);
+			playerMovementDirection *= -1;
+		}
+		else
+		{
+			game->setPlayerX(game->getPlayerX() + playerMovementDirection);
+		}
+		buffer->drawSprite(*playerSprite, game->getPlayerX(), game->getPlayerY(), Buffer::rgb_to_uint(128, 0, 0));
 
 		glTexSubImage2D(
 			GL_TEXTURE_2D, 0, 0, 0,
@@ -212,7 +287,19 @@ int main() {
 			buffer->getData()
 		);
 
-		
+		alienAnimation->addTime();
+		if (alienAnimation->getTime() == alienAnimation->getNumFrames() * alienAnimation->getFrameDuration())
+		{
+			if (alienAnimation->isLooping())
+			{
+				alienAnimation->resetTime();
+			}
+			else
+			{
+				delete alienAnimation;
+				alienAnimation = nullptr;
+			}
+		}
 
 
 		glfwSwapBuffers(window);
@@ -225,7 +312,11 @@ int main() {
 	glfwDestroyWindow(window);
 	glfwTerminate();
 
-	delete alienSprite;
+	delete alienSprite1;
+	delete alienSprite2;
+	delete playerSprite;
 	delete buffer;
+	delete game;
 	return 0;
+
 }
