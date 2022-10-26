@@ -7,6 +7,55 @@
 #include "SpriteAnimation.h"
 
 
+typedef void(*GLFWerrorfun)(int, const char*);
+typedef void(*GLFWkeyfun)(GLFWwindow*, int, int, int, int);
+
+//when GLFW has an error it will call this function
+void errorCallback(int error, const char* description)
+{
+	fprintf(stderr, "Error: %s\n", description);
+}
+
+
+bool quitPressed = false;
+int movementDirection = 0;// 0 is no movement, -1 is left, 1 is right
+bool firePressed = false;
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	switch (key)
+	{
+	case GLFW_KEY_ESCAPE:
+		if (action == GLFW_PRESS)
+			quitPressed = true;
+		break;
+
+	//Movement
+	//this creates a bug that when pressing both buttons you move 2x as fast but I like it so I'm leaving it in
+	case GLFW_KEY_A:
+	case GLFW_KEY_LEFT:
+ 		if (action == GLFW_PRESS)
+			movementDirection -= 1;
+		else if (action == GLFW_RELEASE)
+			movementDirection += 1;
+		break;
+	case GLFW_KEY_D:
+	case GLFW_KEY_RIGHT:
+		if (action == GLFW_PRESS)
+			movementDirection += 1;
+		else if (action == GLFW_RELEASE)
+			movementDirection -= 1;
+		break;
+
+	//Firing missile
+	case GLFW_KEY_SPACE:
+		if (action == GLFW_PRESS)
+			firePressed = true;
+		break;
+
+	default:
+		break;
+	}
+}
 
 void validateShader(GLuint shader, const char* file = 0)
 {
@@ -38,22 +87,18 @@ bool validateProgram(GLuint program)
 	return true;
 }
 
-//callback function for GLFW, when GLFW has an error it will call this function
-void error_callback(int error, const char* description) 
-{
-	fprintf(stderr, "Error: %s\n", description);
-}
 
 int main() {
 
 	const size_t buffer_width = 224;
 	const size_t buffer_height = 256;
-	const size_t alien_width = 11;
-	const size_t alien_height = 8;
 	const size_t player_width = 11;
-	const size_t player_height = 7;
+	const size_t player_height = 7; 
+	const size_t missile_width = 1;
+	const size_t missile_height = 3;
 
-	glfwSetErrorCallback(error_callback);
+	glfwSetErrorCallback(errorCallback);
+	
 
 	//initilize GLFW
 	if (!glfwInit())
@@ -67,6 +112,7 @@ int main() {
 	}
 
 	glfwMakeContextCurrent(window);
+	glfwSetKeyCallback(window, keyCallback);
 
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -187,8 +233,36 @@ int main() {
 	glBindVertexArray(fullScreenVAO);
 
 	//create sprites
-	Sprite *alienSprite1 = new Sprite(alien_width, alien_height);
-	alienSprite1->setData(new uint8_t[alien_width * alien_height]
+	Sprite alienSprites[6];
+	alienSprites[0] = *new Sprite(8, 8);
+	alienSprites[0].setData(new uint8_t[64]
+		{
+			0,0,0,1,1,0,0,0, // ...@@...
+			0,0,1,1,1,1,0,0, // ..@@@@..
+			0,1,1,1,1,1,1,0, // .@@@@@@.
+			1,1,0,1,1,0,1,1, // @@.@@.@@
+			1,1,1,1,1,1,1,1, // @@@@@@@@
+			0,1,0,1,1,0,1,0, // .@.@@.@.
+			1,0,0,0,0,0,0,1, // @......@
+			0,1,0,0,0,0,1,0  // .@....@.
+		});
+
+	alienSprites[1] = *new Sprite(8, 8);
+	alienSprites[1].setData(new uint8_t[64]
+		{
+			0,0,0,1,1,0,0,0, // ...@@...
+			0,0,1,1,1,1,0,0, // ..@@@@..
+			0,1,1,1,1,1,1,0, // .@@@@@@.
+			1,1,0,1,1,0,1,1, // @@.@@.@@
+			1,1,1,1,1,1,1,1, // @@@@@@@@
+			0,0,1,0,0,1,0,0, // ..@..@..
+			0,1,0,1,1,0,1,0, // .@.@@.@.
+			1,0,1,0,0,1,0,1  // @.@..@.@
+		}
+	);
+
+	alienSprites[2] = *new Sprite(11, 8);
+	alienSprites[2].setData(new uint8_t[88]
 		{
 			0,0,1,0,0,0,0,0,1,0,0, // ..@.....@..
 			0,0,0,1,0,0,0,1,0,0,0, // ...@...@...
@@ -198,10 +272,11 @@ int main() {
 			1,0,1,1,1,1,1,1,1,0,1, // @.@@@@@@@.@
 			1,0,1,0,0,0,0,0,1,0,1, // @.@.....@.@
 			0,0,0,1,1,0,1,1,0,0,0  // ...@@.@@...
-		});
+		}
+	);
 
-	Sprite* alienSprite2 = new Sprite(alien_width, alien_height);
-	alienSprite2->setData(new uint8_t[alien_width * alien_height]
+	alienSprites[3] = *new Sprite(11, 8);
+	alienSprites[3].setData(new uint8_t[88]
 		{
 			0,0,1,0,0,0,0,0,1,0,0, // ..@.....@..
 			1,0,0,1,0,0,0,1,0,0,1, // @..@...@..@
@@ -211,6 +286,47 @@ int main() {
 			0,1,1,1,1,1,1,1,1,1,0, // .@@@@@@@@@.
 			0,0,1,0,0,0,0,0,1,0,0, // ..@.....@..
 			0,1,0,0,0,0,0,0,0,1,0  // .@.......@.
+		}
+	);
+
+	alienSprites[4] = *new Sprite(12, 8);
+	alienSprites[4].setData(new uint8_t[96]
+		{
+			0,0,0,0,1,1,1,1,0,0,0,0, // ....@@@@....
+			0,1,1,1,1,1,1,1,1,1,1,0, // .@@@@@@@@@@.
+			1,1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@@
+			1,1,1,0,0,1,1,0,0,1,1,1, // @@@..@@..@@@
+			1,1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@@
+			0,0,0,1,1,0,0,1,1,0,0,0, // ...@@..@@...
+			0,0,1,1,0,1,1,0,1,1,0,0, // ..@@.@@.@@..
+			1,1,0,0,0,0,0,0,0,0,1,1  // @@........@@
+		}
+	);
+
+	alienSprites[5] = *new Sprite(12, 8);
+	alienSprites[5].setData(new uint8_t[96]
+		{
+			0,0,0,0,1,1,1,1,0,0,0,0, // ....@@@@....
+			0,1,1,1,1,1,1,1,1,1,1,0, // .@@@@@@@@@@.
+			1,1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@@
+			1,1,1,0,0,1,1,0,0,1,1,1, // @@@..@@..@@@
+			1,1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@@
+			0,0,1,1,1,0,0,1,1,1,0,0, // ..@@@..@@@..
+			0,1,1,0,0,1,1,0,0,1,1,0, // .@@..@@..@@.
+			0,0,1,1,0,0,0,0,1,1,0,0  // ..@@....@@..
+		}
+	);
+
+	Sprite deadAlienSprite = *new Sprite(13, 7);
+	deadAlienSprite.setData(new uint8_t[96]
+		{
+			0,1,0,0,1,0,0,0,1,0,0,1,0, // .@..@...@..@.
+			0,0,1,0,0,1,0,1,0,0,1,0,0, // ..@..@.@..@..
+			0,0,0,1,0,0,0,0,0,1,0,0,0, // ...@.....@...
+			1,1,0,0,0,0,0,0,0,0,0,1,1, // @@.........@@
+			0,0,0,1,0,0,0,0,0,1,0,0,0, // ...@.....@...
+			0,0,1,0,0,1,0,1,0,0,1,0,0, // ..@..@.@..@..
+			0,1,0,0,1,0,0,0,1,0,0,1,0  // .@..@...@..@.
 		}
 	);
 
@@ -228,24 +344,45 @@ int main() {
 		}
 	);
 
-	//Create animations
-	Sprite** alienFrames = new Sprite * [2];
-	alienFrames[0] = alienSprite1;
-	alienFrames[1] = alienSprite2;
-
-	SpriteAnimation* alienAnimation = new SpriteAnimation(2, 10, 0, alienFrames);
+	Sprite* missileSprite = new Sprite(missile_width, missile_height);
+	missileSprite->setData(new uint8_t[missile_width * missile_height]
+		{
+			1,
+			1,
+			1,
+		});
+	
+	//Create an animation for each of the aliens
+	SpriteAnimation alienAnimation[3] = 
+	{ 
+		*new SpriteAnimation(2, 10, 0, new Sprite* [2]
+			{
+				&alienSprites[0], &alienSprites[1]
+			}),
+		*new SpriteAnimation(2, 10, 0, new Sprite* [2]
+			{
+				&alienSprites[2],& alienSprites[3]
+			}),
+		*new SpriteAnimation(2, 10, 0, new Sprite* [2]
+			{
+				&alienSprites[4],& alienSprites[5]
+			})
+	};
 	
 
 	//Create game
 	Game* game = new Game(buffer_width, buffer_height, 55);
 
+	uint8_t* deathCounters = new uint8_t[game->getNumAliens()];
+	for (size_t i = 0; i < game->getNumAliens(); i++)
+	{
+		deathCounters[i] = 10;
+	}
+
 	glfwSwapInterval(2);
 
 	//game loop
-	//const int target_fps = 30;
-	//double lasttime = glfw()
-	int playerMovementDirection = 1;
-	while (!glfwWindowShouldClose(window)) 
+	while (!glfwWindowShouldClose(window) && !quitPressed) 
 	{
 		buffer->clearBuffer(standardColor);
 
@@ -253,30 +390,66 @@ int main() {
 
 
 		//Draw aliens
-		for (size_t ai = 0; ai < game->getNumAliens(); ai++)
+		for (size_t i = 0; i < game->getNumAliens(); i++)
 		{
-			Alien* alien = game->getAlien(ai);
-			size_t currentFrame = alienAnimation->getTime() / alienAnimation->getFrameDuration();
-			Sprite* spriteToDraw = alienAnimation->getFrames()[currentFrame];
-			buffer->drawSprite(*spriteToDraw, alien->getX(), alien->getY(), Buffer::rgb_to_uint(128, 0, 0));
+			if (!deathCounters[i])
+				continue;
+
+
+			Alien* alien = game->getAlien(i);
+			if (alien->getType() == ALIEN_DEAD)
+			{
+				buffer->drawSprite(deadAlienSprite, alien->getX(), alien->getY(), Buffer::rgb_to_uint(128, 0, 0));
+			}
+			else
+			{
+				
+				SpriteAnimation animation = alienAnimation[alien->getType()-1];
+				if (alien->getType() == ALIEN_TYPE_B)
+					int i = 0;
+				size_t currentFrame = animation.getTime() / animation.getFrameDuration();
+				Sprite* spriteToDraw = animation.getFrames()[currentFrame];
+				buffer->drawSprite(*spriteToDraw, alien->getX(), alien->getY(), Buffer::rgb_to_uint(128, 0, 0));
+			}
 		}
 
+		//Draw missiles
+		for (size_t i = 0; i < game->getNumMissiles(); i++)
+		{
+			Missile missile = game->getMissiles()[i];
+			Sprite* spriteToDraw = missileSprite;
+			buffer->drawSprite(*missileSprite, missile.getX(), missile.getY(), Buffer::rgb_to_uint(128, 0, 0));
+		}
 
+		for (size_t i = 0; i < game->getNumAliens(); i++)
+		{
+			Alien* alien = game->getAlien(i);
+			if (alien->getType() == ALIEN_DEAD && deathCounters[i])
+			{
+				--deathCounters;
+			}
+		}
+
+		//Calculate new missile locations
+		game->calculateNewMissileLocations();
 		
-		//move player back and forth
-		if (game->getPlayerX() + playerSprite->getWidth() + playerMovementDirection >= game->getWidth() - 1)
+		int playerMovementDirection = 2 * movementDirection;
+		if (playerMovementDirection != 0)
 		{
-			game->setPlayerX(game->getWidth() - playerSprite->getWidth() - playerMovementDirection - 1);
-			playerMovementDirection *= -1;
-		}
-		else if ((int)game->getPlayerX() + playerMovementDirection <= 0)
-		{
-			game->setPlayerX(0);
-			playerMovementDirection *= -1;
-		}
-		else
-		{
-			game->setPlayerX(game->getPlayerX() + playerMovementDirection);
+			//check if player would hit right boundry
+			if (game->getPlayerX() + playerSprite->getWidth() + playerMovementDirection >= game->getWidth())
+			{
+				game->setPlayerX(game->getWidth() - playerSprite->getWidth());
+			}
+			//check if player would hit left boundry
+			else if ((int)game->getPlayerX() + playerMovementDirection <= 0)
+			{
+				game->setPlayerX(0);
+			}
+			else
+			{
+				game->setPlayerX(game->getPlayerX() + playerMovementDirection);
+			}
 		}
 		buffer->drawSprite(*playerSprite, game->getPlayerX(), game->getPlayerY(), Buffer::rgb_to_uint(128, 0, 0));
 
@@ -287,18 +460,24 @@ int main() {
 			buffer->getData()
 		);
 
-		alienAnimation->addTime();
-		if (alienAnimation->getTime() == alienAnimation->getNumFrames() * alienAnimation->getFrameDuration())
+		//update time for sprites animations
+		for (size_t i = 0; i < 3; i++)
 		{
-			if (alienAnimation->isLooping())
+			alienAnimation[i].addTime();
+			if (alienAnimation[i].getTime() == alienAnimation[i].getNumFrames() * alienAnimation[i].getFrameDuration())
 			{
-				alienAnimation->resetTime();
+				if (alienAnimation[i].isLooping())
+				{
+					alienAnimation[i].resetTime();
+				}
 			}
-			else
-			{
-				delete alienAnimation;
-				alienAnimation = nullptr;
-			}
+		}
+		
+
+		if (firePressed && game->getNumMissiles() < game->MAX_MISSILES)
+		{
+			game->fireMissile(playerSprite->getWidth(), playerSprite->getHeight(), 2);
+			firePressed = false;
 		}
 
 
@@ -312,8 +491,9 @@ int main() {
 	glfwDestroyWindow(window);
 	glfwTerminate();
 
-	delete alienSprite1;
-	delete alienSprite2;
+	
+	delete[] alienSprites;
+
 	delete playerSprite;
 	delete buffer;
 	delete game;

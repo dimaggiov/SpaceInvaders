@@ -8,8 +8,11 @@ void Game::initAliens()
 	{
 		for (size_t xi = 0; xi < 11; xi++)
 		{
-			aliens[yi * 11 + xi].setX(16 * xi + 20);
-			aliens[yi * 11 + xi].setY(17 * yi + 128);
+			size_t x = 16 * xi + 20;
+			size_t y = 17 * yi + 128;
+			AlienType t = (AlienType)((5 - yi) / 2 + 1);
+			
+			aliens[yi * 11 + xi] = *new Alien(x, y, t);
 		}
 	}
 }
@@ -56,6 +59,42 @@ size_t Game::getHeight()
 void Game::setHeight(size_t height)
 {
 	this->height = height;
+}
+
+size_t Game::getNumMissiles()
+{
+	return numMissiles;
+}
+
+void Game::fireMissile(size_t width, size_t height, int dir)
+{
+	missiles[numMissiles] = *new Missile(player->getX() + width / 2, player->getY() + height, dir);
+	numMissiles++;
+}
+
+void Game::moveMissile(size_t loc)
+{
+	missiles[loc].moveWithSpeed(1);
+}
+
+Missile* Game::getMissiles()
+{
+	return missiles;
+}
+
+void Game::calculateNewMissileLocations()
+{
+	for (size_t i = 0; i < numMissiles;)
+	{
+		moveMissile(i);
+		if (missiles[i].getY() >= height || missiles[i].getY() < 3)
+		{
+			missiles[i] = missiles[numMissiles - 1];
+			numMissiles--;
+			continue;
+		}
+		i++;
+	}
 }
 
 size_t Game::getNumAliens()

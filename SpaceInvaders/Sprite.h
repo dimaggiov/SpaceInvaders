@@ -8,6 +8,7 @@ private:
 	uint8_t * data;
 
 public: 
+	Sprite();
 	Sprite(size_t, size_t);
 	~Sprite();
 

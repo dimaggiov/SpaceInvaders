@@ -4,10 +4,10 @@ Alien::Alien()
 {
 	x = 0;
 	y = 0;
-	type = 0;
+	type = ALIEN_DEAD;
 }
 
-Alien::Alien(size_t x, size_t y, uint8_t type)
+Alien::Alien(size_t x, size_t y, AlienType type)
 {
 	this->x = x;
 	this->y = y;
@@ -34,7 +34,7 @@ void Alien::setY(size_t y)
 	this->y = y;
 }
 
-uint8_t Alien::getType()
+AlienType Alien::getType()
 {
 	return type;
 }

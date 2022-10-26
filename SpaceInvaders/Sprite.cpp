@@ -1,5 +1,12 @@
 #include "Sprite.h"
 
+Sprite::Sprite()
+{
+	width = 0;
+	height = 0;
+	data = new uint8_t();
+}
+
 Sprite::Sprite(size_t width, size_t height)
 {
 	this->width = width;
