@@ -16,7 +16,7 @@ Sprite::Sprite(size_t width, size_t height)
 
 Sprite::~Sprite()
 {
-	delete[] data;
+	//delete data;
 }
 
 uint8_t* Sprite::getData() const

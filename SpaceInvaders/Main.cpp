@@ -144,6 +144,8 @@ int main() {
 	buffer->clearBuffer(standardColor);
 
 
+
+
 	//create buffer texture
 	GLuint bufferTexture;
 	glGenTextures(1, &bufferTexture);
@@ -351,6 +353,86 @@ int main() {
 			1,
 			1,
 		});
+
+	//Text spritesheet
+	Sprite textSpriteSheet = *new Sprite(5, 7);
+	textSpriteSheet.setData(new uint8_t[65 * 35]
+		{
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,
+			0,1,0,1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			0,1,0,1,0,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,0,1,0,1,0,
+			0,0,1,0,0,0,1,1,1,0,1,0,1,0,0,0,1,1,1,0,0,0,1,0,1,0,1,1,1,0,0,0,1,0,0,
+			1,1,0,1,0,1,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,1,0,1,0,1,1,
+			0,1,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,1,0,0,1,0,0,1,0,1,0,0,0,1,0,1,1,1,1,
+			0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,
+			1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,
+			0,0,1,0,0,1,0,1,0,1,0,1,1,1,0,0,0,1,0,0,0,1,1,1,0,1,0,1,0,1,0,0,1,0,0,
+			0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,1,1,1,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,
+			0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,
+
+			0,1,1,1,0,1,0,0,0,1,1,0,0,1,1,1,0,1,0,1,1,1,0,0,1,1,0,0,0,1,0,1,1,1,0,
+			0,0,1,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,1,1,0,
+			0,1,1,1,0,1,0,0,0,1,0,0,0,0,1,0,0,1,1,0,0,1,0,0,0,1,0,0,0,0,1,1,1,1,1,
+			1,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,1,0,0,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
+			0,0,0,1,0,0,0,1,1,0,0,1,0,1,0,1,0,0,1,0,1,1,1,1,1,0,0,0,1,0,0,0,0,1,0,
+			1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
+			0,1,1,1,0,1,0,0,0,1,1,0,0,0,0,1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
+			1,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,
+			0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
+			0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,1,0,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
+
+			0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,
+			0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,
+			0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,
+			1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,
+			0,1,1,1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,
+			0,1,1,1,0,1,0,0,0,1,1,0,1,0,1,1,1,0,1,1,1,0,1,0,0,1,0,0,0,1,0,1,1,1,0,
+
+			0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,
+			1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0,
+			0,1,1,1,0,1,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,1,1,0,
+			1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0,
+			1,1,1,1,1,1,0,0,0,0,1,0,0,0,0,1,1,1,1,0,1,0,0,0,0,1,0,0,0,0,1,1,1,1,1,
+			1,1,1,1,1,1,0,0,0,0,1,0,0,0,0,1,1,1,1,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,
+			0,1,1,1,0,1,0,0,0,1,1,0,0,0,0,1,0,1,1,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
+			1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,
+			0,1,1,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,1,1,0,
+			0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
+			1,0,0,0,1,1,0,0,1,0,1,0,1,0,0,1,1,0,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,0,1,
+			1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,1,1,1,1,
+			1,0,0,0,1,1,1,0,1,1,1,0,1,0,1,1,0,1,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,
+			1,0,0,0,1,1,0,0,0,1,1,1,0,0,1,1,0,1,0,1,1,0,0,1,1,1,0,0,0,1,1,0,0,0,1,
+			0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
+			1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,
+			0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,
+			1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0,1,0,1,0,0,1,0,0,1,0,1,0,0,0,1,
+			0,1,1,1,0,1,0,0,0,1,1,0,0,0,0,0,1,1,1,0,1,0,0,0,1,0,0,0,0,1,0,1,1,1,0,
+			1,1,1,1,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,
+			1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
+			1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,
+			1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,1,0,1,1,0,1,0,1,1,1,0,1,1,1,0,0,0,1,
+			1,0,0,0,1,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,1,0,0,0,1,
+			1,0,0,0,1,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,
+			1,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,1,1,1,1,
+
+			0,0,0,1,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1,1,
+			0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,
+			1,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,0,0,0,
+			0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
+			0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		}
+	);
+
+	Sprite numberSpriteSheet = textSpriteSheet;
+	numberSpriteSheet.setData(numberSpriteSheet.getData() + 16 * 35);
+
 	
 	//Create an animation for each of the aliens
 	SpriteAnimation alienAnimation[3] = 
@@ -379,12 +461,20 @@ int main() {
 		deathCounters[i] = 10;
 	}
 
-	glfwSwapInterval(2);
+	glfwSwapInterval(4);
+
+	int alienMovementDirection = -1;
 
 	//game loop
 	while (!glfwWindowShouldClose(window) && !quitPressed) 
 	{
 		buffer->clearBuffer(standardColor);
+		buffer->drawText(textSpriteSheet, "SCORE", 4, game->getHeight() - textSpriteSheet.getHeight() - 7, Buffer::rgb_to_uint(128,0,0));
+		buffer->drawNumber(numberSpriteSheet, game->getScore(),
+			4 + 2 * numberSpriteSheet.getWidth(), 
+			game->getHeight() - 2 * numberSpriteSheet.getHeight() - 12, 
+			Buffer::rgb_to_uint(128, 0, 0));
+
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
@@ -403,7 +493,6 @@ int main() {
 			}
 			else
 			{
-				
 				SpriteAnimation animation = alienAnimation[alien->getType()-1];
 				if (alien->getType() == ALIEN_TYPE_B)
 					int i = 0;
@@ -426,12 +515,93 @@ int main() {
 			Alien* alien = game->getAlien(i);
 			if (alien->getType() == ALIEN_DEAD && deathCounters[i])
 			{
-				--deathCounters;
+				deathCounters[i]--;
 			}
 		}
 
 		//Calculate new missile locations
-		game->calculateNewMissileLocations();
+		for (size_t currentMissile = 0; currentMissile < game->getNumMissiles();)
+		{
+			game->moveMissile(currentMissile);
+			if (game->getMissiles()[currentMissile].getY() >= game->getHeight() || game->getMissiles()[currentMissile].getY() < 3)
+			{
+				game->removeMissile(currentMissile);
+				continue;
+			}
+
+
+			//check collisions
+			for (size_t currentAlien = 0; currentAlien < game->getNumAliens(); currentAlien++)
+			{
+				Alien* alien = game->getAlien(currentAlien);
+				if (alien->getType() == ALIEN_DEAD)
+					continue;
+
+				SpriteAnimation animation = alienAnimation[alien->getType() - 1];
+				size_t currentFrame = animation.getTime() / animation.getFrameDuration();
+				Sprite* alienSprite = animation.getFrames()[currentFrame];
+
+				bool overlap = game->checkOverlap(missileSprite, currentMissile, alienSprite, currentAlien);
+				if (overlap)
+				{
+					game->addScore(10 * (4 - game->getAlien(currentAlien)->getType()));
+ 					game->getAlien(currentAlien)->setType(ALIEN_DEAD);
+					game->removeMissile(currentMissile);
+				}
+			}
+
+			
+			currentMissile++;
+		}
+
+		//move aliens
+		for (size_t i = 0; i < game->getNumAliens(); i++)
+		{
+			Alien* alien = game->getAlien(i);
+			if (alien->getType() == ALIEN_DEAD)
+				continue;
+
+			SpriteAnimation animation = alienAnimation[alien->getType() - 1];
+			size_t currentFrame = animation.getTime() / animation.getFrameDuration();
+			Sprite* alienSprite = animation.getFrames()[currentFrame];
+
+			//check if alien hit right wall
+			if (alien->getX() + alienSprite->getWidth() + alienMovementDirection >= game->getWidth())
+			{
+				//move all aliens down
+				for (size_t j = 0; j < game->getNumAliens(); j++)
+				{
+					Alien* alienToMoveDown = game->getAlien(j);
+					if (alien->getType() == ALIEN_DEAD)
+						continue;
+
+					alienToMoveDown->setY(alienToMoveDown->getY() - 5);
+				}
+				alien->setX(game->getWidth() - alienSprite->getWidth());
+				alienMovementDirection *= -1;
+				break;
+			}
+			else if ((int)game->getAlien(i)->getX() + alienMovementDirection <= 0)
+			{
+				for (size_t j = 0; j < game->getNumAliens(); j++)
+				{
+					Alien* alienToMoveDown = game->getAlien(j);
+					if (alien->getType() == ALIEN_DEAD)
+						continue;
+
+					alienToMoveDown->setY(alienToMoveDown->getY() - 5);
+				}
+				alien->setX(0);
+				alienMovementDirection *= -1;
+				break;
+			}
+			else
+			{
+				alien->setX(alien->getX() + alienMovementDirection);
+			}
+			
+		}
+
 		
 		int playerMovementDirection = 2 * movementDirection;
 		if (playerMovementDirection != 0)
@@ -492,8 +662,7 @@ int main() {
 	glfwTerminate();
 
 	
-	delete[] alienSprites;
-
+	delete[] deathCounters;
 	delete playerSprite;
 	delete buffer;
 	delete game;

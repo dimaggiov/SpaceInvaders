@@ -2,6 +2,7 @@
 #include "Alien.h"
 #include "Player.h"
 #include "Missile.h"
+#include "Sprite.h"
 class Game
 {
 public:
@@ -9,6 +10,7 @@ public:
 private:
 	size_t width;
 	size_t height;
+	size_t score;
 	size_t numMissiles;
 	size_t numAliens;
 	Alien* aliens;
@@ -27,11 +29,16 @@ public:
 	void setWidth(size_t);
 	size_t getHeight();
 	void setHeight(size_t);
+	size_t getScore();
+	void addScore(size_t);
 	size_t getNumMissiles();
 	void fireMissile(size_t, size_t, int);
+	void removeMissile(size_t loc);
 	void moveMissile(size_t loc);
 	Missile* getMissiles();
 	void calculateNewMissileLocations();
+
+	bool checkOverlap(Sprite*, size_t, Sprite*, size_t);
 	size_t getNumAliens();
 	Alien* getAlien(size_t);
 	size_t getPlayerX();

@@ -11,6 +11,7 @@ private:
 	size_t height;
 	uint32_t* data;
 
+
 public:
 	Buffer(size_t, size_t);
 	~Buffer();
@@ -20,6 +21,8 @@ public:
 	const static uint32_t rgb_to_uint(uint8_t r, uint8_t g, uint8_t b);
 	void clearBuffer(uint32_t);
 	void drawSprite(const Sprite&, size_t, size_t, uint32_t);
+	void drawText(const Sprite&, const char*, size_t, size_t, uint32_t);
+	void drawNumber(const Sprite&, size_t, size_t, size_t, uint32_t);
 
 
 	size_t getWidth() const;

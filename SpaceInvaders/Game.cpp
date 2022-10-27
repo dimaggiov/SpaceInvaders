@@ -21,6 +21,7 @@ Game::Game(size_t width, size_t height, size_t numAliens, Player* player)
 {
 	this->width = width;
 	this->height = height;
+	this->score = 0;
 	this->numAliens = numAliens;
 	this->player = player;
 	initAliens();
@@ -31,6 +32,7 @@ Game::Game(size_t width, size_t height, size_t numAliens)
 	this->width = width;
 	this->height = height;
 	this->numAliens = numAliens;
+	this->score = 0;
 	this->player = new Player();
 	initAliens();
 }
@@ -61,6 +63,16 @@ void Game::setHeight(size_t height)
 	this->height = height;
 }
 
+size_t Game::getScore()
+{
+	return score;
+}
+
+void Game::addScore(size_t score)
+{
+	this->score += score;
+}
+
 size_t Game::getNumMissiles()
 {
 	return numMissiles;
@@ -70,6 +82,12 @@ void Game::fireMissile(size_t width, size_t height, int dir)
 {
 	missiles[numMissiles] = *new Missile(player->getX() + width / 2, player->getY() + height, dir);
 	numMissiles++;
+}
+
+void Game::removeMissile(size_t loc)
+{
+	missiles[loc] = missiles[numMissiles - 1];
+	numMissiles--;
 }
 
 void Game::moveMissile(size_t loc)
@@ -84,17 +102,23 @@ Missile* Game::getMissiles()
 
 void Game::calculateNewMissileLocations()
 {
-	for (size_t i = 0; i < numMissiles;)
+	
+}
+
+
+
+bool Game::checkOverlap(Sprite* missile, size_t missileLoc, Sprite* alien, size_t alienLoc)
+{
+	size_t x1 = missiles[missileLoc].getX();
+	size_t y1 = missiles[missileLoc].getY();
+	size_t x2 = aliens[alienLoc].getX();
+	size_t y2 = aliens[alienLoc].getY();
+	if (x1 < x2 + alien->getWidth() && x1 + missile->getWidth() > x2 &&
+		y1 < y2 + alien->getHeight() && y1 + missile->getHeight() > y2)
 	{
-		moveMissile(i);
-		if (missiles[i].getY() >= height || missiles[i].getY() < 3)
-		{
-			missiles[i] = missiles[numMissiles - 1];
-			numMissiles--;
-			continue;
-		}
-		i++;
+		return true;
 	}
+	return false;
 }
 
 size_t Game::getNumAliens()

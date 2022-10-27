@@ -38,3 +38,8 @@ AlienType Alien::getType()
 {
 	return type;
 }
+
+void Alien::setType(AlienType type)
+{
+	this->type = type;
+}

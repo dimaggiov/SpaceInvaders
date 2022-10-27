@@ -19,6 +19,7 @@ public:
 	size_t getY();
 	void setY(size_t);
 	AlienType getType();
+	void setType(AlienType);
 	
 	
 };

@@ -54,6 +54,48 @@ void Buffer::drawSprite(const Sprite& sprite, size_t x, size_t y, uint32_t color
 	}
 }
 
+void Buffer::drawText(const Sprite& spriteSheet, const char* text, size_t x, size_t y, uint32_t color)
+{
+	size_t xp = x;
+	size_t stride = spriteSheet.getWidth() * spriteSheet.getHeight();
+	Sprite sprite = spriteSheet;
+	for (const char* charp = text; *charp != '\0'; charp++)
+	{
+		char character = *charp - 32;
+		if (character < 0 || character >= 65)
+			continue;
+		
+		sprite.setData(spriteSheet.getData() + character * stride);
+		drawSprite(sprite, xp, y, color);
+		xp += sprite.getWidth() + 1;
+	}
+}
+
+void Buffer::drawNumber(const Sprite& spriteSheet, size_t number, size_t x, size_t y, uint32_t color)
+{
+	uint8_t digits[64];
+	size_t numDigits = 0;
+
+	size_t currentNumber = number;
+	do
+	{
+		digits[numDigits++] = currentNumber % 10;
+		currentNumber = currentNumber / 10;
+	} while (currentNumber > 0);
+
+	size_t xp = x;
+	size_t stride = spriteSheet.getWidth() * spriteSheet.getHeight();
+	Sprite sprite = spriteSheet;
+	for (size_t i = 0; i < numDigits; i++)
+	{
+		uint8_t digit = digits[numDigits - i - 1];
+		sprite.setData(spriteSheet.getData() + digit * stride);
+		drawSprite(sprite, xp, y, color);
+		xp += sprite.getWidth() + 1;
+	}
+
+}
+
 size_t Buffer::getWidth() const
 {
 	return width;
