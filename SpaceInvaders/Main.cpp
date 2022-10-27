@@ -373,15 +373,42 @@ int main() {
 		});
 
 	//bunker sprite
-	Sprite* bunkerSprite = new Sprite(13,6);
-	bunkerSprite->setData(new uint8_t[13*6]
+
+	Sprite bunkerSprites[3];
+
+	bunkerSprites[2] = *new Sprite(15,6);
+	bunkerSprites[2].setData(new uint8_t[15*6]
 		{
-			0,0,0,1,1,1,1,1,1,1,0,0,0, //...@@@@@@@...
-			0,0,1,1,1,1,1,1,1,1,1,0,0, //..@@@@@@@@@..
-			0,1,1,1,1,1,1,1,1,1,1,1,0, //.@@@@@@@@@@@.
-			1,1,1,1,1,1,1,1,1,1,1,1,1, //@@@@@@@@@@@@@
-			1,1,1,1,1,1,1,1,1,1,1,1,1, //@@@@@@@@@@@@@
-			1,1,1,1,0,0,0,0,0,1,1,1,1, //@@@@.....@@@@
+			0,0,0,1,1,1,1,1,1,1,1,1,0,0,0, //...@@@@@@@@@...
+			0,0,1,1,1,1,1,1,1,1,1,1,1,0,0, //..@@@@@@@@@@@..
+			0,1,1,1,1,1,1,1,1,1,1,1,1,1,0, //.@@@@@@@@@@@@@.
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, //@@@@@@@@@@@@@@@
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, //@@@@@@@@@@@@@@@
+			1,1,1,1,0,0,0,0,0,0,0,1,1,1,1, //@@@@.......@@@@
+		}
+	);
+
+	bunkerSprites[1] = *new Sprite(15, 6);
+	bunkerSprites[1].setData(new uint8_t[15 * 6]
+		{
+			0,0,0,1,1,1,1,1,1,1,0,0,0,0,0, //...@@@@@@@.....
+			0,0,1,1,1,1,1,1,1,1,1,0,0,0,0, //..@@@@@@@@@....
+			0,1,1,1,1,1,1,1,1,1,0,0,0,0,0, //.@@@@@@@@@.....
+			1,1,1,1,1,1,1,1,1,1,1,1,0,0,0, //@@@@@@@@@@@@...
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,0, //@@@@@@@@@@@@@@.
+			1,1,1,1,0,0,0,0,0,0,0,1,1,1,1, //@@@@.......@@@@
+		}
+	);
+
+	bunkerSprites[0] = *new Sprite(15, 6);
+	bunkerSprites[0].setData(new uint8_t[15 * 6]
+		{
+			0,0,0,0,0,0,1,1,1,1,0,0,0,0,0, //......@@@@.....
+			0,0,0,0,1,1,1,1,1,1,1,0,0,0,0, //....@@@@@@@....
+			0,0,0,1,1,1,1,1,1,1,0,0,0,0,0, //...@@@@@@@.....
+			0,0,0,0,1,1,1,1,1,1,1,1,0,0,0, //....@@@@@@@@...
+			0,0,1,1,1,1,1,1,1,1,1,1,1,1,0, //..@@@@@@@@@@@@.
+			0,1,1,1,0,0,0,0,0,0,0,1,1,1,1, //.@@@.......@@@@
 		}
 	);
 
@@ -559,7 +586,8 @@ int main() {
 			if (bunker.getlife() == 0)
 				continue;
 
-			buffer->drawSprite(*bunkerSprite, bunker.getX(), bunker.getY(), Buffer::rgb_to_uint(128,0,0));
+			buffer->drawSprite(bunkerSprites[bunker.getlife() - 1], bunker.getX(), bunker.getY(), Buffer::rgb_to_uint(128, 0, 0));
+		
 		}
 
 
@@ -726,7 +754,9 @@ int main() {
 						if (game->getBunkers()[currentBunker].getlife() == 0)
 							continue;
 
-						overlap = game->checkBunkerHit(missileSprite, currentMissile, bunkerSprite, currentBunker);
+
+						
+						overlap = game->checkBunkerHit(missileSprite, currentMissile, &bunkerSprites[game->getBunkers()[currentBunker].getlife() -1], currentBunker);
 						if (overlap)
 						{
 							game->bunkerHit(currentBunker);
