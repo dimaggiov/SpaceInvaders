@@ -22,6 +22,7 @@ void errorCallback(int error, const char* description)
 bool quitPressed = false;
 int movementDirection = 0;// 0 is no movement, -1 is left, 1 is right
 bool firePressed = false;
+bool gameStarted = false;
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	switch (key)
@@ -48,10 +49,17 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			movementDirection -= 1;
 		break;
 
-	//Firing missile
+	//Firing missile or start game
 	case GLFW_KEY_SPACE:
 		if (action == GLFW_PRESS)
+		{
+			if (!gameStarted)
+			{
+ 				gameStarted = true;
+				break;
+			}
 			firePressed = true;
+		}
 		break;
 
 	default:
@@ -100,8 +108,6 @@ int main() {
 	const size_t missile_height = 3;
 
 	glfwSetErrorCallback(errorCallback);
-
-	printf("check1\n");
 
 	//initilize GLFW
 	if (!glfwInit())
@@ -484,22 +490,39 @@ int main() {
 	srand(time(NULL));
 
 	//game loop
-	while (!glfwWindowShouldClose(window) && !quitPressed) 
+	while (!glfwWindowShouldClose(window) && !quitPressed && game->getPlayerLives() != 0) 
 	{
 		buffer->clearBuffer(standardColor);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		
+		//display score
 		buffer->drawText(textSpriteSheet, "SCORE", 4, game->getHeight() - textSpriteSheet.getHeight() - 7, Buffer::rgb_to_uint(128,0,0));
 		buffer->drawNumber(numberSpriteSheet, game->getScore(),
 			4 + 2 * numberSpriteSheet.getWidth(), 
 			game->getHeight() - 2 * numberSpriteSheet.getHeight() - 12, 
 			Buffer::rgb_to_uint(128, 0, 0));
 
+		//horrizontal line at bottom 
+		for (size_t i = 0; i < game->getWidth(); ++i)
+		{
+			buffer->getData()[game->getWidth() * 16 + i] = Buffer::rgb_to_uint(128, 0, 0);
+		}
 
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		//display player lives as ship icon
+		for (size_t i = 0; i < game->getPlayerLives() - 1; i++)
+		{
+			buffer->drawSprite(*playerSprite, i * playerSprite->getWidth() + 10, 5, Buffer::rgb_to_uint(128, 0, 0));
+		}
+
+		
 
 		//Draw bunkers
 		for (size_t i = 0; i < 4; i++)
 		{
 			Bunker bunker = game->getBunkers()[i];
+			if (bunker.getlife() == 0)
+				continue;
+
 			buffer->drawSprite(*bunkerSprite, bunker.getX(), bunker.getY(), Buffer::rgb_to_uint(128,0,0));
 		}
 
@@ -525,6 +548,45 @@ int main() {
 			}
 		}
 
+		//Draw missiles
+		for (size_t i = 0; i < game->getNumMissiles(); i++)
+		{
+			Missile missile = game->getMissiles()[i];
+			Sprite* spriteToDraw = missileSprite;
+			buffer->drawSprite(*missileSprite, missile.getX(), missile.getY(), Buffer::rgb_to_uint(128, 0, 0));
+		}
+
+		//update time for sprites animations
+		for (size_t i = 0; i < 3; i++)
+		{
+			alienAnimation[i].addTime();
+			if (alienAnimation[i].getTime() == alienAnimation[i].getNumFrames() * alienAnimation[i].getFrameDuration())
+			{
+				if (alienAnimation[i].isLooping())
+				{
+					alienAnimation[i].resetTime();
+				}
+			}
+		}
+
+		buffer->drawSprite(*playerSprite, game->getPlayerX(), game->getPlayerY(), Buffer::rgb_to_uint(128, 0, 0));
+
+		glfwSwapBuffers(window);
+
+		glfwPollEvents();
+
+		glTexSubImage2D(
+			GL_TEXTURE_2D, 0, 0, 0,
+			buffer->getWidth(), buffer->getHeight(),
+			GL_RGBA, GL_UNSIGNED_INT_8_8_8_8,
+			buffer->getData()
+		);
+
+
+		//gameplay code goes below here, only happens if game is started
+		if (!gameStarted)
+			continue;
+
 		//shoot missile from alien
 		for (size_t i = 0; i < game->getNumAliens(); i++)
 		{
@@ -544,14 +606,7 @@ int main() {
 		
 		}
 
-		//Draw missiles
-		for (size_t i = 0; i < game->getNumMissiles(); i++)
-		{
-			Missile missile = game->getMissiles()[i];
-			Sprite* spriteToDraw = missileSprite;
-			buffer->drawSprite(*missileSprite, missile.getX(), missile.getY(), Buffer::rgb_to_uint(128, 0, 0));
-		}
-
+		//update death counters for aliens
 		for (size_t i = 0; i < game->getNumAliens(); i++)
 		{
 			Alien* alien = game->getAlien(i);
@@ -601,7 +656,7 @@ int main() {
 				bool overlap = game->checkPlayerHit(missileSprite, currentMissile, playerSprite);
 				if (overlap)
 				{
-
+					gameStarted = false;
 					game->playerHit();
 					//reset death counters for aliens
 					for (size_t i = 0; i < game->getNumAliens(); i++)
@@ -615,9 +670,13 @@ int main() {
 					//check bunker hit
 					for (size_t currentBunker = 0; currentBunker < game->getNumBunkers(); currentBunker++)
 					{
+						if (game->getBunkers()[currentBunker].getlife() == 0)
+							continue;
+
 						overlap = game->checkBunkerHit(missileSprite, currentMissile, bunkerSprite, currentBunker);
 						if (overlap)
 						{
+							game->bunkerHit(currentBunker);
 							game->removeMissile(currentMissile);
 						}
 					}
@@ -694,27 +753,10 @@ int main() {
 				game->setPlayerX(game->getPlayerX() + playerMovementDirection);
 			}
 		}
-		buffer->drawSprite(*playerSprite, game->getPlayerX(), game->getPlayerY(), Buffer::rgb_to_uint(128, 0, 0));
+		//buffer->drawSprite(*playerSprite, game->getPlayerX(), game->getPlayerY(), Buffer::rgb_to_uint(128, 0, 0));
 
-		glTexSubImage2D(
-			GL_TEXTURE_2D, 0, 0, 0,
-			buffer->getWidth(), buffer->getHeight(),
-			GL_RGBA, GL_UNSIGNED_INT_8_8_8_8,
-			buffer->getData()
-		);
-
-		//update time for sprites animations
-		for (size_t i = 0; i < 3; i++)
-		{
-			alienAnimation[i].addTime();
-			if (alienAnimation[i].getTime() == alienAnimation[i].getNumFrames() * alienAnimation[i].getFrameDuration())
-			{
-				if (alienAnimation[i].isLooping())
-				{
-					alienAnimation[i].resetTime();
-				}
-			}
-		}
+		
+		
 		
 		//create new missle for player
 		if (firePressed && game->getNumMissiles() < game->MAX_MISSILES)
@@ -724,9 +766,7 @@ int main() {
 		}
 
 
-		glfwSwapBuffers(window);
-
-		glfwPollEvents();
+		
 	}
 
 

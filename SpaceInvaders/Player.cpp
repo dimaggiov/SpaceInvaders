@@ -27,6 +27,11 @@ void Player::setY(size_t y)
 	this->y = y;
 }
 
+size_t Player::getLives()
+{
+	return life;
+}
+
 void Player::died()
 {
 	life--;

@@ -13,6 +13,7 @@ public:
 	void setX(size_t);
 	size_t getY();
 	void setY(size_t);
+	size_t getLives();
 	void died();
 };
 

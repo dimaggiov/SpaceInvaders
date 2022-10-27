@@ -177,6 +177,11 @@ void Game::playerHit()
 	initBunkers();
 }
 
+void Game::bunkerHit(size_t loc)
+{
+	bunkers[loc].takeDamage();
+}
+
 Bunker* Game::getBunkers()
 {
 	return bunkers;
@@ -215,4 +220,9 @@ size_t Game::getPlayerY()
 void Game::setPlayerY(size_t y)
 {
 	player->setY(y);
+}
+
+size_t Game::getPlayerLives()
+{
+	return player->getLives();
 }

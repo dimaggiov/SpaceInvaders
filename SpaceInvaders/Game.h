@@ -48,6 +48,7 @@ public:
 	bool checkBunkerHit(Sprite*, size_t, Sprite*, size_t);
 
 	void playerHit();
+	void bunkerHit(size_t);
 	Bunker* getBunkers();
 	size_t getNumBunkers();
 	size_t getNumAliens();
@@ -56,6 +57,7 @@ public:
 	void setPlayerX(size_t);
 	size_t getPlayerY();
 	void setPlayerY(size_t);
+	size_t getPlayerLives();
 	
 	
 };
