@@ -810,13 +810,15 @@ int main() {
 		
 	
 		//create new missle for player
-		if (firePressed && game->getNumMissiles() < game->MAX_MISSILES)
+		if (firePressed && game->getNumMissiles() < game->MAX_MISSILES && game->getPlayerMissileCount() < game->PLAYER_MAX_MISSILES)
 		{
 			game->playerFireMissile(playerSprite->getWidth(), playerSprite->getHeight(), 2);
-			firePressed = false;
+			
 		}
-
+		firePressed = false;
 		
+
+
 	}
 
 

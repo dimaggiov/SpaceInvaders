@@ -8,6 +8,7 @@ class Game
 {
 public:
 	static const int MAX_MISSILES = 128;
+	static const int PLAYER_MAX_MISSILES = 2;
 private:
 	size_t width;
 	size_t height;
@@ -50,6 +51,8 @@ public:
 	void playerHit();
 	void bunkerHit(size_t);
 	void startNewRound();
+
+	size_t getPlayerMissileCount();
 
 	Bunker* getBunkers();
 	size_t getNumBunkers();

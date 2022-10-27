@@ -189,6 +189,17 @@ void Game::startNewRound()
 	initBunkers();
 }
 
+size_t Game::getPlayerMissileCount()
+{
+	size_t playerMissiles = 0;
+	for (size_t i = 0; i < numMissiles; i++)
+	{
+		if (missiles[i].getDir() > 0)
+			playerMissiles++;
+	}
+	return playerMissiles;
+}
+
 Bunker* Game::getBunkers()
 {
 	return bunkers;
