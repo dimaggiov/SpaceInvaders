@@ -3,7 +3,7 @@
 Player::Player()
 {
 	x = 107;
-	y = 32;
+	y = 20;
 	life = 3;
 }
 

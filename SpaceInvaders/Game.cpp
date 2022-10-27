@@ -1,5 +1,14 @@
 #include "Game.h"
 
+void Game::initBunkers()
+{
+	bunkers = new Bunker[4];
+	for (int i = 0; i < 4; i++)
+	{
+		bunkers[i] = *new Bunker(i * 50 + 20, 30);
+	}
+}
+
 //give create all aliens and give them initial location
 void Game::initAliens()
 {
@@ -25,6 +34,7 @@ Game::Game(size_t width, size_t height, size_t numAliens, Player* player)
 	this->numAliens = numAliens;
 	this->player = player;
 	initAliens();
+	initBunkers();
 }
 
 Game::Game(size_t width, size_t height, size_t numAliens)
@@ -35,6 +45,7 @@ Game::Game(size_t width, size_t height, size_t numAliens)
 	this->score = 0;
 	this->player = new Player();
 	initAliens();
+	initBunkers();
 }
 
 Game::~Game()
@@ -119,6 +130,11 @@ bool Game::checkOverlap(Sprite* missile, size_t missileLoc, Sprite* alien, size_
 		return true;
 	}
 	return false;
+}
+
+Bunker* Game::getBunkers()
+{
+	return bunkers;
 }
 
 size_t Game::getNumAliens()

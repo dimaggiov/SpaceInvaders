@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "Missile.h"
 #include "Sprite.h"
+#include "Bunker.h"
 class Game
 {
 public:
@@ -15,8 +16,10 @@ private:
 	size_t numAliens;
 	Alien* aliens;
 	Player* player;
+	Bunker* bunkers;
 	Missile missiles[MAX_MISSILES];
 
+	void initBunkers();
 	void initAliens();
 
 public:
@@ -31,14 +34,16 @@ public:
 	void setHeight(size_t);
 	size_t getScore();
 	void addScore(size_t);
+
 	size_t getNumMissiles();
 	void fireMissile(size_t, size_t, int);
 	void removeMissile(size_t loc);
 	void moveMissile(size_t loc);
 	Missile* getMissiles();
 	void calculateNewMissileLocations();
-
 	bool checkOverlap(Sprite*, size_t, Sprite*, size_t);
+
+	Bunker* getBunkers();
 	size_t getNumAliens();
 	Alien* getAlien(size_t);
 	size_t getPlayerX();

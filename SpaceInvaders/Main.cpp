@@ -93,12 +93,12 @@ int main() {
 	const size_t buffer_width = 224;
 	const size_t buffer_height = 256;
 	const size_t player_width = 11;
-	const size_t player_height = 7; 
+	const size_t player_height = 7;
 	const size_t missile_width = 1;
 	const size_t missile_height = 3;
 
 	glfwSetErrorCallback(errorCallback);
-	
+
 
 	//initilize GLFW
 	if (!glfwInit())
@@ -138,8 +138,8 @@ int main() {
 
 
 	//create buffer for game
-	Buffer *buffer = new Buffer(buffer_width, buffer_height);
-	uint32_t standardColor =Buffer::rgb_to_uint(0,128,0);
+	Buffer* buffer = new Buffer(buffer_width, buffer_height);
+	uint32_t standardColor = Buffer::rgb_to_uint(0, 128, 0);
 	buffer->setData(new uint32_t[buffer->getWidth() * buffer->getHeight()]);
 	buffer->clearBuffer(standardColor);
 
@@ -191,7 +191,7 @@ int main() {
 		"    outColor = texture(buffer, TexCoord).rgb;\n"
 		"}\n";
 
-	
+
 
 	GLuint shaderID = glCreateProgram();
 
@@ -354,6 +354,19 @@ int main() {
 			1,
 		});
 
+	//bunker sprite
+	Sprite* bunkerSprite = new Sprite(13,6);
+	bunkerSprite->setData(new uint8_t[13*6]
+		{
+			0,0,0,1,1,1,1,1,1,1,0,0,0, //...@@@@@@@...
+			0,0,1,1,1,1,1,1,1,1,1,0,0, //..@@@@@@@@@..
+			0,1,1,1,1,1,1,1,1,1,1,1,0, //.@@@@@@@@@@@.
+			1,1,1,1,1,1,1,1,1,1,1,1,1, //@@@@@@@@@@@@@
+			1,1,1,1,1,1,1,1,1,1,1,1,1, //@@@@@@@@@@@@@
+			1,1,1,1,0,0,0,0,0,1,1,1,1, //@@@@.....@@@@
+		}
+	);
+
 	//Text spritesheet
 	Sprite textSpriteSheet = *new Sprite(5, 7);
 	textSpriteSheet.setData(new uint8_t[65 * 35]
@@ -461,7 +474,7 @@ int main() {
 		deathCounters[i] = 10;
 	}
 
-	glfwSwapInterval(4);
+	glfwSwapInterval(6);
 
 	int alienMovementDirection = -1;
 
@@ -477,6 +490,13 @@ int main() {
 
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		//Draw bunkers
+		for (size_t i = 0; i < 4; i++)
+		{
+			Bunker bunker = game->getBunkers()[i];
+			buffer->drawSprite(*bunkerSprite, bunker.getX(), bunker.getY(), Buffer::rgb_to_uint(128,0,0));
+		}
 
 
 		//Draw aliens
@@ -577,7 +597,6 @@ int main() {
 
 					alienToMoveDown->setY(alienToMoveDown->getY() - 5);
 				}
-				alien->setX(game->getWidth() - alienSprite->getWidth());
 				alienMovementDirection *= -1;
 				break;
 			}
@@ -591,7 +610,6 @@ int main() {
 
 					alienToMoveDown->setY(alienToMoveDown->getY() - 5);
 				}
-				alien->setX(0);
 				alienMovementDirection *= -1;
 				break;
 			}
