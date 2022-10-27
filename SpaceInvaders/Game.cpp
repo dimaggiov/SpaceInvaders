@@ -173,6 +173,7 @@ void Game::playerHit()
 {
 	player->died();
 	numMissiles = 0;
+	player->setX(107);
 	initAliens();
 	initBunkers();
 }

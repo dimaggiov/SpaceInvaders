@@ -23,6 +23,8 @@ bool quitPressed = false;
 int movementDirection = 0;// 0 is no movement, -1 is left, 1 is right
 bool firePressed = false;
 bool gameStarted = false;
+bool gameOver = false;
+bool resetGame = false;
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	switch (key)
@@ -53,6 +55,13 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	case GLFW_KEY_SPACE:
 		if (action == GLFW_PRESS)
 		{
+
+			if (gameOver)
+			{
+				gameOver = false;
+				resetGame = true;
+				break;
+			}
 			if (!gameStarted)
 			{
  				gameStarted = true;
@@ -490,8 +499,14 @@ int main() {
 	srand(time(NULL));
 
 	//game loop
-	while (!glfwWindowShouldClose(window) && !quitPressed && game->getPlayerLives() != 0) 
+	while (!glfwWindowShouldClose(window) && !quitPressed) 
 	{
+		if (resetGame)
+		{
+			game = new Game(buffer_width, buffer_height, 55);
+			resetGame = false;
+		}
+
 		buffer->clearBuffer(standardColor);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		
@@ -506,6 +521,23 @@ int main() {
 		for (size_t i = 0; i < game->getWidth(); ++i)
 		{
 			buffer->getData()[game->getWidth() * 16 + i] = Buffer::rgb_to_uint(128, 0, 0);
+		}
+
+
+		if (gameOver)
+		{
+			buffer->drawText(textSpriteSheet, "GAME OVER", game->getWidth() / 2, game->getHeight() - textSpriteSheet.getHeight() - game->getHeight() / 2, Buffer::rgb_to_uint(128, 0, 0));
+			glfwSwapBuffers(window);
+
+			glfwPollEvents();
+
+			glTexSubImage2D(
+				GL_TEXTURE_2D, 0, 0, 0,
+				buffer->getWidth(), buffer->getHeight(),
+				GL_RGBA, GL_UNSIGNED_INT_8_8_8_8,
+				buffer->getData()
+			);
+			continue;
 		}
 
 		//display player lives as ship icon
@@ -587,6 +619,7 @@ int main() {
 		if (!gameStarted)
 			continue;
 
+
 		//shoot missile from alien
 		for (size_t i = 0; i < game->getNumAliens(); i++)
 		{
@@ -663,6 +696,10 @@ int main() {
 					{
 						deathCounters[i] = 10;
 					}
+
+					if (game->getPlayerLives() == 0)
+						gameOver = true;
+					
 					
 				}
 				else
