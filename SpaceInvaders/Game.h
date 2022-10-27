@@ -49,6 +49,8 @@ public:
 
 	void playerHit();
 	void bunkerHit(size_t);
+	void startNewRound();
+
 	Bunker* getBunkers();
 	size_t getNumBunkers();
 	size_t getNumAliens();

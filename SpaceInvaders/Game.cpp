@@ -172,15 +172,21 @@ bool Game::checkBunkerHit(Sprite* missileSprite, size_t missileLoc, Sprite* bunk
 void Game::playerHit()
 {
 	player->died();
-	numMissiles = 0;
-	player->setX(107);
-	initAliens();
-	initBunkers();
+	startNewRound();
+	
 }
 
 void Game::bunkerHit(size_t loc)
 {
 	bunkers[loc].takeDamage();
+}
+
+void Game::startNewRound()
+{
+	numMissiles = 0;
+	player->setX(107);
+	initAliens();
+	initBunkers();
 }
 
 Bunker* Game::getBunkers()

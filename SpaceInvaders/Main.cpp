@@ -505,6 +505,10 @@ int main() {
 		{
 			game = new Game(buffer_width, buffer_height, 55);
 			resetGame = false;
+			for (size_t i = 0; i < game->getNumAliens(); i++)
+			{
+				deathCounters[i] = 10;
+			}
 		}
 
 		buffer->clearBuffer(standardColor);
@@ -560,10 +564,14 @@ int main() {
 
 
 		//Draw aliens
+		size_t countDeadAliens = 0;
 		for (size_t i = 0; i < game->getNumAliens(); i++)
 		{
 			if (!deathCounters[i])
+			{
+				countDeadAliens++;
 				continue;
+			}
 
 
 			Alien* alien = game->getAlien(i);
@@ -578,6 +586,16 @@ int main() {
 				Sprite* spriteToDraw = animation.getFrames()[currentFrame];
 				buffer->drawSprite(*spriteToDraw, alien->getX(), alien->getY(), Buffer::rgb_to_uint(128, 0, 0));
 			}
+		}
+
+		if (countDeadAliens == game->getNumAliens())
+		{
+			game->startNewRound();
+			for (size_t i = 0; i < game->getNumAliens(); i++)
+			{
+				deathCounters[i] = 10;
+			}
+			gameStarted = false;
 		}
 
 		//Draw missiles
@@ -635,8 +653,6 @@ int main() {
 
 			game->alienFireMissile(alien, shootingSprite->getWidth(), shootingSprite->getHeight(), -2);
 
-			
-		
 		}
 
 		//update death counters for aliens
@@ -790,18 +806,15 @@ int main() {
 				game->setPlayerX(game->getPlayerX() + playerMovementDirection);
 			}
 		}
-		//buffer->drawSprite(*playerSprite, game->getPlayerX(), game->getPlayerY(), Buffer::rgb_to_uint(128, 0, 0));
 
 		
-		
-		
+	
 		//create new missle for player
 		if (firePressed && game->getNumMissiles() < game->MAX_MISSILES)
 		{
 			game->playerFireMissile(playerSprite->getWidth(), playerSprite->getHeight(), 2);
 			firePressed = false;
 		}
-
 
 		
 	}
@@ -817,5 +830,5 @@ int main() {
 	delete buffer;
 	delete game;
 	return 0;
-
+	
 }
