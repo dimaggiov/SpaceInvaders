@@ -31,6 +31,7 @@ Game::Game(size_t width, size_t height, size_t numAliens, Player* player)
 	this->width = width;
 	this->height = height;
 	this->score = 0;
+	numBunkers = 4;
 	this->numAliens = numAliens;
 	this->player = player;
 	initAliens();
@@ -43,6 +44,7 @@ Game::Game(size_t width, size_t height, size_t numAliens)
 	this->height = height;
 	this->numAliens = numAliens;
 	this->score = 0;
+	numBunkers = 4;
 	this->player = new Player();
 	initAliens();
 	initBunkers();
@@ -89,9 +91,15 @@ size_t Game::getNumMissiles()
 	return numMissiles;
 }
 
-void Game::fireMissile(size_t width, size_t height, int dir)
+void Game::playerFireMissile(size_t width, size_t height, int dir)
 {
 	missiles[numMissiles] = *new Missile(player->getX() + width / 2, player->getY() + height, dir);
+	numMissiles++;
+}
+
+void Game::alienFireMissile(Alien* alien, size_t width, size_t height, int dir)
+{
+	missiles[numMissiles] = *new Missile(alien->getX() + width / 2, alien->getY() + height, dir);
 	numMissiles++;
 }
 
@@ -118,7 +126,7 @@ void Game::calculateNewMissileLocations()
 
 
 
-bool Game::checkOverlap(Sprite* missile, size_t missileLoc, Sprite* alien, size_t alienLoc)
+bool Game::checkAlienHit(Sprite* missile, size_t missileLoc, Sprite* alien, size_t alienLoc)
 {
 	size_t x1 = missiles[missileLoc].getX();
 	size_t y1 = missiles[missileLoc].getY();
@@ -132,9 +140,51 @@ bool Game::checkOverlap(Sprite* missile, size_t missileLoc, Sprite* alien, size_
 	return false;
 }
 
+bool Game::checkPlayerHit(Sprite* missileSprite, size_t missileLoc, Sprite* playerSprite)
+{
+	size_t missileX = missiles[missileLoc].getX();
+	size_t missileY = missiles[missileLoc].getY();
+	size_t playerX = player->getX();
+	size_t playerY = player->getY();
+	if (missileX < playerX + playerSprite->getWidth() && missileX + missileSprite->getWidth() > playerX &&
+		missileY < playerY + playerSprite->getHeight() && missileY + missileSprite->getHeight() > playerY)
+	{
+		return true;
+	}
+	return false;
+	
+}
+
+bool Game::checkBunkerHit(Sprite* missileSprite, size_t missileLoc, Sprite* bunkerSprite, size_t bunkerLoc)
+{
+	size_t missileX = missiles[missileLoc].getX();
+	size_t missileY = missiles[missileLoc].getY();
+	size_t bunkerX = bunkers[bunkerLoc].getX();
+	size_t bunkerY = bunkers[bunkerLoc].getY();
+	if (missileX < bunkerX + bunkerSprite->getWidth() && missileX + missileSprite->getWidth() > bunkerX &&
+		missileY < bunkerY + bunkerSprite->getHeight() && missileY + missileSprite->getHeight() > bunkerY)
+	{
+		return true;
+	}
+	return false;
+}
+
+void Game::playerHit()
+{
+	player->died();
+	numMissiles = 0;
+	initAliens();
+	initBunkers();
+}
+
 Bunker* Game::getBunkers()
 {
 	return bunkers;
+}
+
+size_t Game::getNumBunkers()
+{
+	return numBunkers;
 }
 
 size_t Game::getNumAliens()

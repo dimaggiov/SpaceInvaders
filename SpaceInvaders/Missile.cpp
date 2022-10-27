@@ -24,6 +24,11 @@ size_t Missile::getY()
 	return y;
 }
 
+int Missile::getDir()
+{
+	return dir;
+}
+
 void Missile::moveWithSpeed(size_t speed)
 {
 	y += speed * dir;

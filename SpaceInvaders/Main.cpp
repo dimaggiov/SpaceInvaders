@@ -5,6 +5,8 @@
 #include "Buffer.h"
 #include "Game.h"
 #include "SpriteAnimation.h"
+#include <cstdlib>
+#include <time.h>
 
 
 typedef void(*GLFWerrorfun)(int, const char*);
@@ -99,6 +101,7 @@ int main() {
 
 	glfwSetErrorCallback(errorCallback);
 
+	printf("check1\n");
 
 	//initilize GLFW
 	if (!glfwInit())
@@ -477,6 +480,8 @@ int main() {
 	glfwSwapInterval(6);
 
 	int alienMovementDirection = -1;
+	
+	srand(time(NULL));
 
 	//game loop
 	while (!glfwWindowShouldClose(window) && !quitPressed) 
@@ -514,12 +519,29 @@ int main() {
 			else
 			{
 				SpriteAnimation animation = alienAnimation[alien->getType()-1];
-				if (alien->getType() == ALIEN_TYPE_B)
-					int i = 0;
 				size_t currentFrame = animation.getTime() / animation.getFrameDuration();
 				Sprite* spriteToDraw = animation.getFrames()[currentFrame];
 				buffer->drawSprite(*spriteToDraw, alien->getX(), alien->getY(), Buffer::rgb_to_uint(128, 0, 0));
 			}
+		}
+
+		//shoot missile from alien
+		for (size_t i = 0; i < game->getNumAliens(); i++)
+		{
+			Alien* alien = game->getAlien(i);
+			if (rand() % 1000 != 1 || game->getNumMissiles() == Game::MAX_MISSILES) //.1% chance for every alien to shoot
+				continue;
+			if (alien->getType() == ALIEN_DEAD)
+				continue;
+
+			SpriteAnimation animation = alienAnimation[alien->getType() - 1];
+			size_t currentFrame = animation.getTime() / animation.getFrameDuration();
+			Sprite* shootingSprite = animation.getFrames()[currentFrame];
+
+			game->alienFireMissile(alien, shootingSprite->getWidth(), shootingSprite->getHeight(), -2);
+
+			
+		
 		}
 
 		//Draw missiles
@@ -561,13 +583,46 @@ int main() {
 				size_t currentFrame = animation.getTime() / animation.getFrameDuration();
 				Sprite* alienSprite = animation.getFrames()[currentFrame];
 
-				bool overlap = game->checkOverlap(missileSprite, currentMissile, alienSprite, currentAlien);
+				//check if player missile hit alien
+				if (game->getMissiles()[currentMissile].getDir() > 0)
+				{
+					bool overlap = game->checkAlienHit(missileSprite, currentMissile, alienSprite, currentAlien);
+					if (overlap)
+					{
+						game->addScore(10 * (4 - game->getAlien(currentAlien)->getType()));
+						game->getAlien(currentAlien)->setType(ALIEN_DEAD);
+						game->removeMissile(currentMissile);
+					}
+				}
+			}
+			//check if alien missile hit player or bunker
+			if (game->getMissiles()[currentMissile].getDir() < 0)
+			{
+				bool overlap = game->checkPlayerHit(missileSprite, currentMissile, playerSprite);
 				if (overlap)
 				{
-					game->addScore(10 * (4 - game->getAlien(currentAlien)->getType()));
- 					game->getAlien(currentAlien)->setType(ALIEN_DEAD);
-					game->removeMissile(currentMissile);
+
+					game->playerHit();
+					//reset death counters for aliens
+					for (size_t i = 0; i < game->getNumAliens(); i++)
+					{
+						deathCounters[i] = 10;
+					}
+					
 				}
+				else
+				{
+					//check bunker hit
+					for (size_t currentBunker = 0; currentBunker < game->getNumBunkers(); currentBunker++)
+					{
+						overlap = game->checkBunkerHit(missileSprite, currentMissile, bunkerSprite, currentBunker);
+						if (overlap)
+						{
+							game->removeMissile(currentMissile);
+						}
+					}
+				}
+			
 			}
 
 			
@@ -661,10 +716,10 @@ int main() {
 			}
 		}
 		
-
+		//create new missle for player
 		if (firePressed && game->getNumMissiles() < game->MAX_MISSILES)
 		{
-			game->fireMissile(playerSprite->getWidth(), playerSprite->getHeight(), 2);
+			game->playerFireMissile(playerSprite->getWidth(), playerSprite->getHeight(), 2);
 			firePressed = false;
 		}
 

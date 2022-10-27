@@ -14,6 +14,7 @@ private:
 	size_t score;
 	size_t numMissiles;
 	size_t numAliens;
+	size_t numBunkers;
 	Alien* aliens;
 	Player* player;
 	Bunker* bunkers;
@@ -36,14 +37,19 @@ public:
 	void addScore(size_t);
 
 	size_t getNumMissiles();
-	void fireMissile(size_t, size_t, int);
+	void playerFireMissile(size_t, size_t, int);
+	void alienFireMissile(Alien*, size_t, size_t, int);
 	void removeMissile(size_t loc);
 	void moveMissile(size_t loc);
 	Missile* getMissiles();
 	void calculateNewMissileLocations();
-	bool checkOverlap(Sprite*, size_t, Sprite*, size_t);
+	bool checkAlienHit(Sprite*, size_t, Sprite*, size_t);
+	bool checkPlayerHit(Sprite*, size_t, Sprite*);
+	bool checkBunkerHit(Sprite*, size_t, Sprite*, size_t);
 
+	void playerHit();
 	Bunker* getBunkers();
+	size_t getNumBunkers();
 	size_t getNumAliens();
 	Alien* getAlien(size_t);
 	size_t getPlayerX();

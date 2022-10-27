@@ -12,6 +12,7 @@ public:
 
 	size_t getX();
 	size_t getY();
+	int getDir();
 	void moveWithSpeed(size_t);
 
 
