@@ -23,6 +23,7 @@ private:
 
 	void initBunkers();
 	void initAliens();
+	void resetAlienPositions();
 
 public:
 	
@@ -47,6 +48,8 @@ public:
 	bool checkAlienHit(Sprite*, size_t, Sprite*, size_t);
 	bool checkPlayerHit(Sprite*, size_t, Sprite*);
 	bool checkBunkerHit(Sprite*, size_t, Sprite*, size_t);
+	bool checkAlienHitBunker(Sprite*, size_t, Sprite*, size_t);
+	bool checkAlienHitPlayer(Sprite*, size_t, Sprite*);
 
 	void playerHit();
 	void bunkerHit(size_t);

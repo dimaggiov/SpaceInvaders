@@ -18,10 +18,22 @@ void Game::initAliens()
 		for (size_t xi = 0; xi < 11; xi++)
 		{
 			size_t x = 16 * xi + 20;
-			size_t y = 17 * yi + 128;
+			size_t y = 17 * yi + 153;
 			AlienType t = (AlienType)((5 - yi) / 2 + 1);
 			
 			aliens[yi * 11 + xi] = *new Alien(x, y, t);
+		}
+	}
+}
+
+void Game::resetAlienPositions()
+{
+	for (size_t yi = 0; yi < 5; yi++)
+	{
+		for (size_t xi = 0; xi < 11; xi++)
+		{
+			aliens[yi * 11 + xi].setX(16 * xi + 20);
+			aliens[yi * 11 + xi].setY(17 * yi + 153);
 		}
 	}
 }
@@ -169,6 +181,34 @@ bool Game::checkBunkerHit(Sprite* missileSprite, size_t missileLoc, Sprite* bunk
 	return false;
 }
 
+bool Game::checkAlienHitBunker(Sprite* alienSprite, size_t alienLoc, Sprite* bunkerSprite, size_t bunkerLoc)
+{
+	size_t alienX = aliens[alienLoc].getX();
+	size_t alienY = aliens[alienLoc].getY();
+	size_t bunkerX = bunkers[bunkerLoc].getX();
+	size_t bunkerY = bunkers[bunkerLoc].getY();
+	if (alienX < bunkerX + bunkerSprite->getWidth() && alienX + alienSprite->getWidth() > bunkerX &&
+		alienY < bunkerY + bunkerSprite->getHeight() && alienY + alienSprite->getHeight() > bunkerY)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool Game::checkAlienHitPlayer(Sprite* alienSprite, size_t alienLoc, Sprite* playerSprite)
+{
+	size_t alienX = aliens[alienLoc].getX();
+	size_t alienY = aliens[alienLoc].getY();
+	size_t playerX = player->getX();
+	size_t playerY = player->getY();
+	if (alienX < playerX + playerSprite->getWidth() && alienX + alienSprite->getWidth() > playerX &&
+		alienY < playerY + playerSprite->getHeight() && alienY + alienSprite->getHeight() > playerY)
+	{
+		return true;
+	}
+	return false;
+}
+
 void Game::playerHit()
 {
 	player->died();
@@ -185,7 +225,17 @@ void Game::startNewRound()
 {
 	numMissiles = 0;
 	player->setX(107);
-	initAliens();
+	size_t deadAliens = 0;
+	for (size_t i = 0; i < numAliens; i++)
+	{
+		if(aliens[i].getType() == ALIEN_DEAD)
+			deadAliens++;
+	}
+	if (deadAliens == numAliens)
+		initAliens();
+	else
+		resetAlienPositions();
+
 	initBunkers();
 }
 
