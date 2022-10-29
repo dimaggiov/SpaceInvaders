@@ -9,7 +9,7 @@ private:
 
 public: 
 	Sprite();
-	Sprite(size_t, size_t);
+	Sprite(size_t, size_t, uint8_t *);
 	~Sprite();
 
 	uint8_t* getData() const;

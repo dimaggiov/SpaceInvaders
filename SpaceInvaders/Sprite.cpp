@@ -7,11 +7,11 @@ Sprite::Sprite()
 	data = new uint8_t();
 }
 
-Sprite::Sprite(size_t width, size_t height)
+Sprite::Sprite(size_t width, size_t height, uint8_t * data)
 {
 	this->width = width;
 	this->height = height;
-	this->data = nullptr;
+	this->data = data;
 }
 
 Sprite::~Sprite()

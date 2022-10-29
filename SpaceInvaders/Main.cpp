@@ -7,7 +7,9 @@
 #include "SpriteAnimation.h"
 #include <cstdlib>
 #include <time.h>
+#include "Sprites.h"
 
+using namespace sprites;
 
 typedef void(*GLFWerrorfun)(int, const char*);
 typedef void(*GLFWkeyfun)(GLFWwindow*, int, int, int, int);
@@ -255,244 +257,6 @@ int main() {
 
 	glBindVertexArray(fullScreenVAO);
 
-	//create sprites
-	Sprite alienSprites[6];
-	alienSprites[0] = *new Sprite(8, 8);
-	alienSprites[0].setData(new uint8_t[64]
-		{
-			0,0,0,1,1,0,0,0, // ...@@...
-			0,0,1,1,1,1,0,0, // ..@@@@..
-			0,1,1,1,1,1,1,0, // .@@@@@@.
-			1,1,0,1,1,0,1,1, // @@.@@.@@
-			1,1,1,1,1,1,1,1, // @@@@@@@@
-			0,1,0,1,1,0,1,0, // .@.@@.@.
-			1,0,0,0,0,0,0,1, // @......@
-			0,1,0,0,0,0,1,0  // .@....@.
-		});
-
-	alienSprites[1] = *new Sprite(8, 8);
-	alienSprites[1].setData(new uint8_t[64]
-		{
-			0,0,0,1,1,0,0,0, // ...@@...
-			0,0,1,1,1,1,0,0, // ..@@@@..
-			0,1,1,1,1,1,1,0, // .@@@@@@.
-			1,1,0,1,1,0,1,1, // @@.@@.@@
-			1,1,1,1,1,1,1,1, // @@@@@@@@
-			0,0,1,0,0,1,0,0, // ..@..@..
-			0,1,0,1,1,0,1,0, // .@.@@.@.
-			1,0,1,0,0,1,0,1  // @.@..@.@
-		}
-	);
-
-	alienSprites[2] = *new Sprite(11, 8);
-	alienSprites[2].setData(new uint8_t[88]
-		{
-			0,0,1,0,0,0,0,0,1,0,0, // ..@.....@..
-			0,0,0,1,0,0,0,1,0,0,0, // ...@...@...
-			0,0,1,1,1,1,1,1,1,0,0, // ..@@@@@@@..
-			0,1,1,0,1,1,1,0,1,1,0, // .@@.@@@.@@.
-			1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
-			1,0,1,1,1,1,1,1,1,0,1, // @.@@@@@@@.@
-			1,0,1,0,0,0,0,0,1,0,1, // @.@.....@.@
-			0,0,0,1,1,0,1,1,0,0,0  // ...@@.@@...
-		}
-	);
-
-	alienSprites[3] = *new Sprite(11, 8);
-	alienSprites[3].setData(new uint8_t[88]
-		{
-			0,0,1,0,0,0,0,0,1,0,0, // ..@.....@..
-			1,0,0,1,0,0,0,1,0,0,1, // @..@...@..@
-			1,0,1,1,1,1,1,1,1,0,1, // @.@@@@@@@.@
-			1,1,1,0,1,1,1,0,1,1,1, // @@@.@@@.@@@
-			1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
-			0,1,1,1,1,1,1,1,1,1,0, // .@@@@@@@@@.
-			0,0,1,0,0,0,0,0,1,0,0, // ..@.....@..
-			0,1,0,0,0,0,0,0,0,1,0  // .@.......@.
-		}
-	);
-
-	alienSprites[4] = *new Sprite(12, 8);
-	alienSprites[4].setData(new uint8_t[96]
-		{
-			0,0,0,0,1,1,1,1,0,0,0,0, // ....@@@@....
-			0,1,1,1,1,1,1,1,1,1,1,0, // .@@@@@@@@@@.
-			1,1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@@
-			1,1,1,0,0,1,1,0,0,1,1,1, // @@@..@@..@@@
-			1,1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@@
-			0,0,0,1,1,0,0,1,1,0,0,0, // ...@@..@@...
-			0,0,1,1,0,1,1,0,1,1,0,0, // ..@@.@@.@@..
-			1,1,0,0,0,0,0,0,0,0,1,1  // @@........@@
-		}
-	);
-
-	alienSprites[5] = *new Sprite(12, 8);
-	alienSprites[5].setData(new uint8_t[96]
-		{
-			0,0,0,0,1,1,1,1,0,0,0,0, // ....@@@@....
-			0,1,1,1,1,1,1,1,1,1,1,0, // .@@@@@@@@@@.
-			1,1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@@
-			1,1,1,0,0,1,1,0,0,1,1,1, // @@@..@@..@@@
-			1,1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@@
-			0,0,1,1,1,0,0,1,1,1,0,0, // ..@@@..@@@..
-			0,1,1,0,0,1,1,0,0,1,1,0, // .@@..@@..@@.
-			0,0,1,1,0,0,0,0,1,1,0,0  // ..@@....@@..
-		}
-	);
-
-	Sprite deadAlienSprite = *new Sprite(13, 7);
-	deadAlienSprite.setData(new uint8_t[96]
-		{
-			0,1,0,0,1,0,0,0,1,0,0,1,0, // .@..@...@..@.
-			0,0,1,0,0,1,0,1,0,0,1,0,0, // ..@..@.@..@..
-			0,0,0,1,0,0,0,0,0,1,0,0,0, // ...@.....@...
-			1,1,0,0,0,0,0,0,0,0,0,1,1, // @@.........@@
-			0,0,0,1,0,0,0,0,0,1,0,0,0, // ...@.....@...
-			0,0,1,0,0,1,0,1,0,0,1,0,0, // ..@..@.@..@..
-			0,1,0,0,1,0,0,0,1,0,0,1,0  // .@..@...@..@.
-		}
-	);
-
-
-	Sprite* playerSprite = new Sprite(player_width, player_height);
-	playerSprite->setData(new uint8_t[player_width * player_height]
-		{
-			0,0,0,0,0,1,0,0,0,0,0, // .....@.....
-			0,0,0,0,1,1,1,0,0,0,0, // ....@@@....
-			0,0,0,0,1,1,1,0,0,0,0, // ....@@@....
-			0,1,1,1,1,1,1,1,1,1,0, // .@@@@@@@@@.
-			1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
-			1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
-			1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
-		}
-	);
-
-	Sprite* missileSprite = new Sprite(missile_width, missile_height);
-	missileSprite->setData(new uint8_t[missile_width * missile_height]
-		{
-			1,
-			1,
-			1,
-		});
-
-	//bunker sprite
-
-	Sprite bunkerSprites[3];
-
-	bunkerSprites[2] = *new Sprite(15,6);
-	bunkerSprites[2].setData(new uint8_t[15*6]
-		{
-			0,0,0,1,1,1,1,1,1,1,1,1,0,0,0, //...@@@@@@@@@...
-			0,0,1,1,1,1,1,1,1,1,1,1,1,0,0, //..@@@@@@@@@@@..
-			0,1,1,1,1,1,1,1,1,1,1,1,1,1,0, //.@@@@@@@@@@@@@.
-			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, //@@@@@@@@@@@@@@@
-			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, //@@@@@@@@@@@@@@@
-			1,1,1,1,0,0,0,0,0,0,0,1,1,1,1, //@@@@.......@@@@
-		}
-	);
-
-	bunkerSprites[1] = *new Sprite(15, 6);
-	bunkerSprites[1].setData(new uint8_t[15 * 6]
-		{
-			0,0,0,1,1,1,1,1,1,1,0,0,0,0,0, //...@@@@@@@.....
-			0,0,1,1,1,1,1,1,1,1,1,0,0,0,0, //..@@@@@@@@@....
-			0,1,1,1,1,1,1,1,1,1,0,0,0,0,0, //.@@@@@@@@@.....
-			1,1,1,1,1,1,1,1,1,1,1,1,0,0,0, //@@@@@@@@@@@@...
-			1,1,1,1,1,1,1,1,1,1,1,1,1,1,0, //@@@@@@@@@@@@@@.
-			1,1,1,1,0,0,0,0,0,0,0,1,1,1,1, //@@@@.......@@@@
-		}
-	);
-
-	bunkerSprites[0] = *new Sprite(15, 6);
-	bunkerSprites[0].setData(new uint8_t[15 * 6]
-		{
-			0,0,0,0,0,0,1,1,1,1,0,0,0,0,0, //......@@@@.....
-			0,0,0,0,1,1,1,1,1,1,1,0,0,0,0, //....@@@@@@@....
-			0,0,0,1,1,1,1,1,1,1,0,0,0,0,0, //...@@@@@@@.....
-			0,0,0,0,1,1,1,1,1,1,1,1,0,0,0, //....@@@@@@@@...
-			0,0,1,1,1,1,1,1,1,1,1,1,1,1,0, //..@@@@@@@@@@@@.
-			0,1,1,1,0,0,0,0,0,0,0,1,1,1,1, //.@@@.......@@@@
-		}
-	);
-
-	//Text spritesheet
-	Sprite textSpriteSheet = *new Sprite(5, 7);
-	textSpriteSheet.setData(new uint8_t[65 * 35]
-		{
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,
-			0,1,0,1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,1,0,1,0,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,0,1,0,1,0,
-			0,0,1,0,0,0,1,1,1,0,1,0,1,0,0,0,1,1,1,0,0,0,1,0,1,0,1,1,1,0,0,0,1,0,0,
-			1,1,0,1,0,1,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,1,0,1,0,1,1,
-			0,1,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,1,0,0,1,0,0,1,0,1,0,0,0,1,0,1,1,1,1,
-			0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,
-			1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,
-			0,0,1,0,0,1,0,1,0,1,0,1,1,1,0,0,0,1,0,0,0,1,1,1,0,1,0,1,0,1,0,0,1,0,0,
-			0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,1,1,1,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,
-			0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,
-
-			0,1,1,1,0,1,0,0,0,1,1,0,0,1,1,1,0,1,0,1,1,1,0,0,1,1,0,0,0,1,0,1,1,1,0,
-			0,0,1,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,1,1,0,
-			0,1,1,1,0,1,0,0,0,1,0,0,0,0,1,0,0,1,1,0,0,1,0,0,0,1,0,0,0,0,1,1,1,1,1,
-			1,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,1,0,0,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
-			0,0,0,1,0,0,0,1,1,0,0,1,0,1,0,1,0,0,1,0,1,1,1,1,1,0,0,0,1,0,0,0,0,1,0,
-			1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
-			0,1,1,1,0,1,0,0,0,1,1,0,0,0,0,1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
-			1,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,
-			0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
-			0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,1,0,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
-
-			0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,
-			0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,
-			0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,
-			1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,
-			0,1,1,1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,
-			0,1,1,1,0,1,0,0,0,1,1,0,1,0,1,1,1,0,1,1,1,0,1,0,0,1,0,0,0,1,0,1,1,1,0,
-
-			0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,
-			1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0,
-			0,1,1,1,0,1,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,1,1,0,
-			1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0,
-			1,1,1,1,1,1,0,0,0,0,1,0,0,0,0,1,1,1,1,0,1,0,0,0,0,1,0,0,0,0,1,1,1,1,1,
-			1,1,1,1,1,1,0,0,0,0,1,0,0,0,0,1,1,1,1,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,
-			0,1,1,1,0,1,0,0,0,1,1,0,0,0,0,1,0,1,1,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
-			1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,
-			0,1,1,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,1,1,0,
-			0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
-			1,0,0,0,1,1,0,0,1,0,1,0,1,0,0,1,1,0,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,0,1,
-			1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,1,1,1,1,
-			1,0,0,0,1,1,1,0,1,1,1,0,1,0,1,1,0,1,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,
-			1,0,0,0,1,1,0,0,0,1,1,1,0,0,1,1,0,1,0,1,1,0,0,1,1,1,0,0,0,1,1,0,0,0,1,
-			0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
-			1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,
-			0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,
-			1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0,1,0,1,0,0,1,0,0,1,0,1,0,0,0,1,
-			0,1,1,1,0,1,0,0,0,1,1,0,0,0,0,0,1,1,1,0,1,0,0,0,1,0,0,0,0,1,0,1,1,1,0,
-			1,1,1,1,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,
-			1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,
-			1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,
-			1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,1,0,1,1,0,1,0,1,1,1,0,1,1,1,0,0,0,1,
-			1,0,0,0,1,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,1,0,0,0,1,
-			1,0,0,0,1,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,
-			1,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,1,1,1,1,
-
-			0,0,0,1,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1,1,
-			0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,
-			1,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,0,0,0,
-			0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
-			0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-		}
-	);
-
-	Sprite numberSpriteSheet = textSpriteSheet;
-	numberSpriteSheet.setData(numberSpriteSheet.getData() + 16 * 35);
 
 	
 	//Create an animation for each of the aliens
@@ -500,15 +264,15 @@ int main() {
 	{ 
 		*new SpriteAnimation(2, 10, 0, new Sprite* [2]
 			{
-				&alienSprites[0], &alienSprites[1]
+				alienSprites[0], alienSprites[1]
 			}),
 		*new SpriteAnimation(2, 10, 0, new Sprite* [2]
 			{
-				&alienSprites[2],& alienSprites[3]
+				alienSprites[2], alienSprites[3]
 			}),
 		*new SpriteAnimation(2, 10, 0, new Sprite* [2]
 			{
-				&alienSprites[4],& alienSprites[5]
+				alienSprites[4], alienSprites[5]
 			})
 	};
 	
@@ -550,10 +314,11 @@ int main() {
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		
 		//display score
-		buffer->drawText(textSpriteSheet, "SCORE", 4, game->getHeight() - textSpriteSheet.getHeight() - 7, Buffer::rgb_to_uint(128,0,0));
+		buffer->drawText(textSpriteSheet, "SCORE", 4, game->getHeight() - textSpriteSheet->getHeight() - 7, Buffer::rgb_to_uint(128,0,0));
+
 		buffer->drawNumber(numberSpriteSheet, game->getScore(),
-			4 + 2 * numberSpriteSheet.getWidth(), 
-			game->getHeight() - 2 * numberSpriteSheet.getHeight() - 12, 
+			4 + 2 * numberSpriteSheet->getWidth(),
+			game->getHeight() - 2 * numberSpriteSheet->getHeight() - 12,
 			Buffer::rgb_to_uint(128, 0, 0));
 
 		//horrizontal line at bottom 
@@ -565,7 +330,7 @@ int main() {
 
 		if (gameOver)
 		{
-			buffer->drawText(textSpriteSheet, "GAME OVER", game->getWidth() / 2, game->getHeight() - textSpriteSheet.getHeight() - game->getHeight() / 2, Buffer::rgb_to_uint(128, 0, 0));
+			buffer->drawText(textSpriteSheet, "GAME OVER", game->getWidth() / 2, game->getHeight() - textSpriteSheet->getHeight() - game->getHeight() / 2, Buffer::rgb_to_uint(128, 0, 0));
 			glfwSwapBuffers(window);
 
 			glfwPollEvents();
@@ -582,7 +347,7 @@ int main() {
 		//display player lives as ship icon
 		for (size_t i = 0; i < game->getPlayerLives() - 1; i++)
 		{
-			buffer->drawSprite(*playerSprite, i * playerSprite->getWidth() + 10, 5, Buffer::rgb_to_uint(128, 0, 0));
+			buffer->drawSprite(playerSprite, i * playerSprite->getWidth() + 10, 5, Buffer::rgb_to_uint(128, 0, 0));
 		}
 
 		
@@ -620,7 +385,7 @@ int main() {
 				SpriteAnimation animation = alienAnimation[alien->getType()-1];
 				size_t currentFrameOfAnimation = animation.getTime() / animation.getFrameDuration();
 				Sprite* spriteToDraw = animation.getFrames()[currentFrameOfAnimation];
-				buffer->drawSprite(*spriteToDraw, alien->getX(), alien->getY(), Buffer::rgb_to_uint(128, 0, 0));
+				buffer->drawSprite(spriteToDraw, alien->getX(), alien->getY(), Buffer::rgb_to_uint(128, 0, 0));
 			}
 		}
 
@@ -681,7 +446,7 @@ int main() {
 		{
 			Missile missile = game->getMissiles()[i];
 			Sprite* spriteToDraw = missileSprite;
-			buffer->drawSprite(*missileSprite, missile.getX(), missile.getY(), Buffer::rgb_to_uint(128, 0, 0));
+			buffer->drawSprite(missileSprite, missile.getX(), missile.getY(), Buffer::rgb_to_uint(128, 0, 0));
 		}
 
 		//update time for sprites animations
@@ -697,7 +462,7 @@ int main() {
 			}
 		}
 
-		buffer->drawSprite(*playerSprite, game->getPlayerX(), game->getPlayerY(), Buffer::rgb_to_uint(128, 0, 0));
+		buffer->drawSprite(playerSprite, game->getPlayerX(), game->getPlayerY(), Buffer::rgb_to_uint(128, 0, 0));
 
 		glfwSwapBuffers(window);
 
@@ -799,7 +564,7 @@ int main() {
 						if (game->getBunkers()[currentBunker].getlife() == 0)
 							continue;
 						
-						overlap = game->checkBunkerHit(missileSprite, currentMissile, &bunkerSprites[game->getBunkers()[currentBunker].getlife() -1], currentBunker);
+						overlap = game->checkBunkerHit(missileSprite, currentMissile, bunkerSprites[game->getBunkers()[currentBunker].getlife() -1], currentBunker);
 						if (overlap)
 						{
 							game->bunkerHit(currentBunker);
@@ -816,7 +581,7 @@ int main() {
 					if (game->getBunkers()[currentBunker].getlife() == 0)
 						continue;
 
-					bool overlap = game->checkBunkerHit(missileSprite, currentMissile, &bunkerSprites[game->getBunkers()[currentBunker].getlife() - 1], currentBunker);
+					bool overlap = game->checkBunkerHit(missileSprite, currentMissile, bunkerSprites[game->getBunkers()[currentBunker].getlife() - 1], currentBunker);
 					if (overlap)
 					{
 						game->removeMissile(currentMissile); // just remove missile, no pushinment for hit
@@ -845,7 +610,7 @@ int main() {
 				if (game->getBunkers()[currentBunker].getlife() == 0)
 					continue;
 
-				bool overlap = game->checkAlienHitBunker(alienSprite, currentAlien, &bunkerSprites[game->getBunkers()[currentBunker].getlife() - 1], currentBunker);
+				bool overlap = game->checkAlienHitBunker(alienSprite, currentAlien, bunkerSprites[game->getBunkers()[currentBunker].getlife() - 1], currentBunker);
 				if (overlap)
 				{
 					game->getBunkers()[currentBunker].takeDamage();
