@@ -4,18 +4,35 @@
 #include "Missile.h"
 #include "Sprite.h"
 #include "Bunker.h"
+#include "Buffer.h"
+#include "Sprites.h"
+
+
 class Game
 {
 public:
 	static const int MAX_MISSILES = 128;
 	static const int PLAYER_MAX_MISSILES = 2;
 private:
+
+	bool gameOver;
+	bool continueRound;
 	size_t width;
 	size_t height;
 	size_t score;
+
 	size_t numMissiles;
 	size_t numAliens;
+	size_t numDeadAliens;
+	uint8_t* deathCounters;
 	size_t numBunkers;
+	
+
+	size_t chanceToShoot;
+	size_t alienMoveSpeed;
+	int alienMoveDirection;
+	int playerMoveDirection;
+
 	Alien* aliens;
 	Player* player;
 	Bunker* bunkers;
@@ -25,6 +42,18 @@ private:
 	void initAliens();
 	void resetAlienPositions();
 
+	void playerFireMissile(size_t, size_t, int);
+	void alienFireMissile(Alien*, size_t, size_t, int);
+	void moveMissile(size_t loc);
+	void removeMissile(size_t loc);
+	size_t getPlayerMissileCount();
+
+	bool checkAlienHit(Sprite*, size_t, Sprite*, size_t);
+	bool checkPlayerHit(Sprite*, size_t, Sprite*);
+	bool checkBunkerHit(Sprite*, size_t, Sprite*, size_t);
+	bool checkAlienHitBunker(Sprite*, size_t, Sprite*, size_t);
+	bool checkAlienHitPlayer(Sprite*, size_t, Sprite*);
+
 public:
 	
 	Game(size_t, size_t, size_t, Player*);
@@ -32,40 +61,23 @@ public:
 	~Game();
 
 	size_t getWidth();
-	void setWidth(size_t);
 	size_t getHeight();
-	void setHeight(size_t);
-	size_t getScore();
-	void addScore(size_t);
+	
 
-	size_t getNumMissiles();
-	void playerFireMissile(size_t, size_t, int);
-	void alienFireMissile(Alien*, size_t, size_t, int);
-	void removeMissile(size_t loc);
-	void moveMissile(size_t loc);
-	Missile* getMissiles();
-	void calculateNewMissileLocations();
-	bool checkAlienHit(Sprite*, size_t, Sprite*, size_t);
-	bool checkPlayerHit(Sprite*, size_t, Sprite*);
-	bool checkBunkerHit(Sprite*, size_t, Sprite*, size_t);
-	bool checkAlienHitBunker(Sprite*, size_t, Sprite*, size_t);
-	bool checkAlienHitPlayer(Sprite*, size_t, Sprite*);
 
-	void playerHit();
-	void bunkerHit(size_t);
+
+	void shootForPlayer();
+	void shootAlienMissiles();
+	void checkCollisions();
+
+	void movePlayer(int);
+	void moveAliens(unsigned int);
+
+	void drawGame(Buffer*);
 	void startNewRound();
-
-	size_t getPlayerMissileCount();
-
-	Bunker* getBunkers();
-	size_t getNumBunkers();
-	size_t getNumAliens();
-	Alien* getAlien(size_t);
-	size_t getPlayerX();
-	void setPlayerX(size_t);
-	size_t getPlayerY();
-	void setPlayerY(size_t);
-	size_t getPlayerLives();
+	bool isGameOver();
+	bool shouldContinueRound();
+	void setContinueRound(bool);
 	
 	
 };

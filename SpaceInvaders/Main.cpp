@@ -4,12 +4,9 @@
 #include<GLFW/glfw3.h>
 #include "Buffer.h"
 #include "Game.h"
-#include "SpriteAnimation.h"
 #include <cstdlib>
 #include <time.h>
-#include "Sprites.h"
 
-using namespace sprites;
 
 typedef void(*GLFWerrorfun)(int, const char*);
 typedef void(*GLFWkeyfun)(GLFWwindow*, int, int, int, int);
@@ -27,8 +24,6 @@ bool firePressed = false;
 bool gameStarted = false;
 bool gameOver = false;
 bool resetGame = false;
-int alienMovementDirection = -1;
-int alienMoveSpeed = 8;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -116,10 +111,6 @@ int main() {
 
 	const size_t buffer_width = 224;
 	const size_t buffer_height = 256;
-	const size_t player_width = 11;
-	const size_t player_height = 7;
-	const size_t missile_width = 1;
-	const size_t missile_height = 3;
 
 	glfwSetErrorCallback(errorCallback);
 
@@ -260,31 +251,11 @@ int main() {
 
 	
 	//Create an animation for each of the aliens
-	SpriteAnimation alienAnimation[3] = 
-	{ 
-		*new SpriteAnimation(2, 10, 0, new Sprite* [2]
-			{
-				alienSprites[0], alienSprites[1]
-			}),
-		*new SpriteAnimation(2, 10, 0, new Sprite* [2]
-			{
-				alienSprites[2], alienSprites[3]
-			}),
-		*new SpriteAnimation(2, 10, 0, new Sprite* [2]
-			{
-				alienSprites[4], alienSprites[5]
-			})
-	};
+
 	
 
 	//Create game
 	Game* game = new Game(buffer_width, buffer_height, 55);
-
-	uint8_t* deathCounters = new uint8_t[game->getNumAliens()];
-	for (size_t i = 0; i < game->getNumAliens(); i++)
-	{
-		deathCounters[i] = 10;
-	}
 
 	glfwSwapInterval(2);
 	
@@ -297,177 +268,25 @@ int main() {
 	//game loop
 	while (!glfwWindowShouldClose(window) && !quitPressed) 
 	{
-		
+		buffer->clearBuffer(standardColor);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
 		currentFrame++;
+
+		gameOver = game->isGameOver();
 
 		if (resetGame)
 		{
 			game = new Game(buffer_width, buffer_height, 55);
 			resetGame = false;
-			for (size_t i = 0; i < game->getNumAliens(); i++)
-			{
-				deathCounters[i] = 10;
-			}
 		}
 
-		buffer->clearBuffer(standardColor);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		game->drawGame(buffer);
 		
-		//display score
-		buffer->drawText(textSpriteSheet, "SCORE", 4, game->getHeight() - textSpriteSheet->getHeight() - 7, Buffer::rgb_to_uint(128,0,0));
-
-		buffer->drawNumber(numberSpriteSheet, game->getScore(),
-			4 + 2 * numberSpriteSheet->getWidth(),
-			game->getHeight() - 2 * numberSpriteSheet->getHeight() - 12,
-			Buffer::rgb_to_uint(128, 0, 0));
-
-		//horrizontal line at bottom 
-		for (size_t i = 0; i < game->getWidth(); ++i)
-		{
-			buffer->getData()[game->getWidth() * 16 + i] = Buffer::rgb_to_uint(128, 0, 0);
-		}
-
-
-		if (gameOver)
-		{
-			buffer->drawText(textSpriteSheet, "GAME OVER", game->getWidth() / 2, game->getHeight() - textSpriteSheet->getHeight() - game->getHeight() / 2, Buffer::rgb_to_uint(128, 0, 0));
-			glfwSwapBuffers(window);
-
-			glfwPollEvents();
-
-			glTexSubImage2D(
-				GL_TEXTURE_2D, 0, 0, 0,
-				buffer->getWidth(), buffer->getHeight(),
-				GL_RGBA, GL_UNSIGNED_INT_8_8_8_8,
-				buffer->getData()
-			);
-			continue;
-		}
-
-		//display player lives as ship icon
-		for (size_t i = 0; i < game->getPlayerLives() - 1; i++)
-		{
-			buffer->drawSprite(playerSprite, i * playerSprite->getWidth() + 10, 5, Buffer::rgb_to_uint(128, 0, 0));
-		}
-
-		
-
-		//Draw bunkers
-		for (size_t i = 0; i < 4; i++)
-		{
-			Bunker bunker = game->getBunkers()[i];
-			if (bunker.getlife() == 0)
-				continue;
-
-			buffer->drawSprite(bunkerSprites[bunker.getlife() - 1], bunker.getX(), bunker.getY(), Buffer::rgb_to_uint(128, 0, 0));
-		
-		}
-
-
-		//Draw aliens
-		countDeadAliens = 0;
-		for (size_t i = 0; i < game->getNumAliens(); i++)
-		{
-			if (!deathCounters[i])
-			{
-				countDeadAliens++;
-				continue;
-			}
-
-
-			Alien* alien = game->getAlien(i);
-			if (alien->getType() == ALIEN_DEAD)
-			{
-				buffer->drawSprite(deadAlienSprite, alien->getX(), alien->getY(), Buffer::rgb_to_uint(128, 0, 0));
-			}
-			else
-			{
-				SpriteAnimation animation = alienAnimation[alien->getType()-1];
-				size_t currentFrameOfAnimation = animation.getTime() / animation.getFrameDuration();
-				Sprite* spriteToDraw = animation.getFrames()[currentFrameOfAnimation];
-				buffer->drawSprite(spriteToDraw, alien->getX(), alien->getY(), Buffer::rgb_to_uint(128, 0, 0));
-			}
-		}
-
-		//update alien speed based on number of dead aliens
-		//or end round if all dead
-		switch (countDeadAliens)
-		{
-		case 0:
-			alienMoveSpeed = 9;
-			chanceToShoot = 10;
-			break;
-		case 6:
-			alienMoveSpeed = 8;
-			chanceToShoot = 12;
-		case 11:
-			alienMoveSpeed = 7;
-			chanceToShoot = 13;
-			break;
-		case 15:
-			alienMoveSpeed = 6;
-			chanceToShoot = 15;
-			break;
-		case 22: 
-			alienMoveSpeed = 5;
-			chanceToShoot = 20;
-			break;
-		case 26:
-			alienMoveSpeed = 4;
-			chanceToShoot = 25;
-			break;
-		case 33:
-			alienMoveSpeed = 3;
-			chanceToShoot = 30;
-			break;
-		case 44:
-			alienMoveSpeed = 2;
-			chanceToShoot = 50;
-			break;
-		case 54:
-			alienMoveSpeed = 1;
-			chanceToShoot = 100;
-			break;
-		case 55:
-			game->startNewRound();
-			for (size_t i = 0; i < game->getNumAliens(); i++)
-			{
-				deathCounters[i] = 10;
-			}
-			gameStarted = false;
-			break;
-		}
-
-
-
-
-		//Draw missiles
-		for (size_t i = 0; i < game->getNumMissiles(); i++)
-		{
-			Missile missile = game->getMissiles()[i];
-			Sprite* spriteToDraw = missileSprite;
-			buffer->drawSprite(missileSprite, missile.getX(), missile.getY(), Buffer::rgb_to_uint(128, 0, 0));
-		}
-
-		//update time for sprites animations
-		for (size_t i = 0; i < 3; i++)
-		{
-			alienAnimation[i].addTime();
-			if (alienAnimation[i].getTime() == alienAnimation[i].getNumFrames() * alienAnimation[i].getFrameDuration())
-			{
-				if (alienAnimation[i].isLooping())
-				{
-					alienAnimation[i].resetTime();
-				}
-			}
-		}
-
-		buffer->drawSprite(playerSprite, game->getPlayerX(), game->getPlayerY(), Buffer::rgb_to_uint(128, 0, 0));
 
 		glfwSwapBuffers(window);
-
 		glfwPollEvents();
-
 		glTexSubImage2D(
 			GL_TEXTURE_2D, 0, 0, 0,
 			buffer->getWidth(), buffer->getHeight(),
@@ -475,250 +294,30 @@ int main() {
 			buffer->getData()
 		);
 
+		game->setContinueRound(gameStarted);
 
-		//gameplay code goes below here, only happens if game is started
-		if (!gameStarted)
+   		if (!game->shouldContinueRound())
+		{
+			gameStarted = false;
 			continue;
-
-
-		//shoot missile from alien
-		for (size_t i = 0; i < game->getNumAliens(); i++)
-		{
-			Alien* alien = game->getAlien(i);
-
-			if (rand() % 10000 + 1 >= chanceToShoot || game->getNumMissiles() == Game::MAX_MISSILES) //.1% chance for every alien to shoot
-				continue;
-			if (alien->getType() == ALIEN_DEAD)
-				continue;
-
-			SpriteAnimation animation = alienAnimation[alien->getType() - 1];
-			size_t currentFrameOfAnimation = animation.getTime() / animation.getFrameDuration();
-			Sprite* shootingSprite = animation.getFrames()[currentFrameOfAnimation];
-
-			game->alienFireMissile(alien, shootingSprite->getWidth(), shootingSprite->getHeight(), -2);
-
 		}
-
-		//update death counters for aliens
-		for (size_t i = 0; i < game->getNumAliens(); i++)
-		{
-			Alien* alien = game->getAlien(i);
-			if (alien->getType() == ALIEN_DEAD && deathCounters[i])
-			{
-				deathCounters[i]--;
-			}
-		}
-
-		//Calculate new missile locations
-		for (size_t currentMissile = 0; currentMissile < game->getNumMissiles();)
-		{
-			game->moveMissile(currentMissile);
-			if (game->getMissiles()[currentMissile].getY() >= game->getHeight() || game->getMissiles()[currentMissile].getY() < 3)
-			{
-				game->removeMissile(currentMissile);
-				continue;
-			}
-
-
-			//check missile collisions
-			for (size_t currentAlien = 0; currentAlien < game->getNumAliens(); currentAlien++)
-			{
-				Alien* alien = game->getAlien(currentAlien);
-				if (alien->getType() == ALIEN_DEAD)
-					continue;
-
-				SpriteAnimation animation = alienAnimation[alien->getType() - 1];
-				size_t currentFrameOfAnimation = animation.getTime() / animation.getFrameDuration();
-				Sprite* alienSprite = animation.getFrames()[currentFrameOfAnimation];
-
-				//check if player missile hit alien
-				if (game->getMissiles()[currentMissile].getDir() > 0)
-				{
-					bool overlap = game->checkAlienHit(missileSprite, currentMissile, alienSprite, currentAlien);
-					if (overlap)
-					{
-						game->addScore(10 * (4 - game->getAlien(currentAlien)->getType()));
-						game->getAlien(currentAlien)->setType(ALIEN_DEAD);
-						game->removeMissile(currentMissile);
-					}
-				
-				}
-
-			}
-			//check if alien missile hit player or bunker
-			if (game->getMissiles()[currentMissile].getDir() < 0)
-			{
-				bool overlap = game->checkPlayerHit(missileSprite, currentMissile, playerSprite);
-				if (overlap)
-				{
-					gameStarted = false;
-					game->playerHit();
-					if (game->getPlayerLives() == 0)
-						gameOver = true;
-				}
-				else
-				{
-					//check bunker hit
-					for (size_t currentBunker = 0; currentBunker < game->getNumBunkers(); currentBunker++)
-					{
-						if (game->getBunkers()[currentBunker].getlife() == 0)
-							continue;
-						
-						overlap = game->checkBunkerHit(missileSprite, currentMissile, bunkerSprites[game->getBunkers()[currentBunker].getlife() -1], currentBunker);
-						if (overlap)
-						{
-							game->bunkerHit(currentBunker);
-							game->removeMissile(currentMissile);
-						}
-					}
-				}
-			
-			}
-			else // check if player hit bunker
-			{
-				for (size_t currentBunker = 0; currentBunker < game->getNumBunkers(); currentBunker++)
-				{
-					if (game->getBunkers()[currentBunker].getlife() == 0)
-						continue;
-
-					bool overlap = game->checkBunkerHit(missileSprite, currentMissile, bunkerSprites[game->getBunkers()[currentBunker].getlife() - 1], currentBunker);
-					if (overlap)
-					{
-						game->removeMissile(currentMissile); // just remove missile, no pushinment for hit
-					}
-				}
-			}
-			
-			currentMissile++;
-		}
-
-
-
-		//check if alien hits bunker or player
-		for (size_t currentAlien = 0; currentAlien < game->getNumAliens(); currentAlien++)
-		{
-			Alien* alien = game->getAlien(currentAlien);
-			if (alien->getType() == ALIEN_DEAD)
-				continue;
-
-			SpriteAnimation animation = alienAnimation[alien->getType() - 1];
-			size_t currentFrameOfAnimation = animation.getTime() / animation.getFrameDuration();
-			Sprite* alienSprite = animation.getFrames()[currentFrameOfAnimation];
-
-			for (size_t currentBunker = 0; currentBunker < game->getNumBunkers(); currentBunker++)
-			{
-				if (game->getBunkers()[currentBunker].getlife() == 0)
-					continue;
-
-				bool overlap = game->checkAlienHitBunker(alienSprite, currentAlien, bunkerSprites[game->getBunkers()[currentBunker].getlife() - 1], currentBunker);
-				if (overlap)
-				{
-					game->getBunkers()[currentBunker].takeDamage();
-				}
-			}
-
-			bool overlap = game->checkAlienHitPlayer(alienSprite, currentAlien, playerSprite);
-			if (overlap)
-			{
-				gameStarted = false;
-				game->playerHit();
-				if (game->getPlayerLives() == 0)
-					gameOver = true;
-			}
-		}
-			
 		
 
+		game->shootAlienMissiles();
 
+		game->checkCollisions();
+		gameStarted = game->shouldContinueRound();
 
-		int playerMovementDirection = 2 * movementDirection;
-		if (playerMovementDirection != 0)
-		{
-			//check if player would hit right boundry
-			if (game->getPlayerX() + playerSprite->getWidth() + playerMovementDirection >= game->getWidth())
-			{
-				game->setPlayerX(game->getWidth() - playerSprite->getWidth());
-			}
-			//check if player would hit left boundry
-			else if ((int)game->getPlayerX() + playerMovementDirection <= 0)
-			{
-				game->setPlayerX(0);
-			}
-			else
-			{
-				game->setPlayerX(game->getPlayerX() + playerMovementDirection);
-			}
-		}
-
+		game->movePlayer(movementDirection);
 		
-	
-		//create new missle for player
-		if (firePressed && game->getNumMissiles() < game->MAX_MISSILES && game->getPlayerMissileCount() < game->PLAYER_MAX_MISSILES)
+
+		if (firePressed)
 		{
-			game->playerFireMissile(playerSprite->getWidth(), playerSprite->getHeight(), 4);
-			
+			game->shootForPlayer();
 		}
 		firePressed = false;
-		
 
-		if (currentFrame % alienMoveSpeed != 0)
-			continue;
-
-		//move aliens
-		for (size_t i = 0; i < game->getNumAliens(); i++)
-		{
-			Alien* alien = game->getAlien(i);
-			if (alien->getType() == ALIEN_DEAD)
-				continue;
-
-			SpriteAnimation animation = alienAnimation[alien->getType() - 1];
-			size_t currentFrameOfAnimation = animation.getTime() / animation.getFrameDuration();
-			Sprite* alienSprite = animation.getFrames()[currentFrameOfAnimation];
-
-			//check if alien hit right wall
-			if (alien->getX() + alienSprite->getWidth() + alienMovementDirection >= game->getWidth())
-			{
-				//move all aliens down
-				for (size_t j = 0; j < game->getNumAliens(); j++)
-				{
-					Alien* alienToMoveDown = game->getAlien(j);
-					if (alien->getType() == ALIEN_DEAD)
-						continue;
-
-					alienToMoveDown->setY(alienToMoveDown->getY() - 5);
-					if (alienToMoveDown->getY() < game->getPlayerY())
-					{
-						gameStarted = false;
-						game->playerHit();
-
-						if (game->getPlayerLives() == 0)
-							gameOver = true;
-					}
-
-				}
-				alienMovementDirection *= -1;
-				break;
-			}
-			else if ((int)game->getAlien(i)->getX() + alienMovementDirection <= 0)
-			{
-				for (size_t j = 0; j < game->getNumAliens(); j++)
-				{
-					Alien* alienToMoveDown = game->getAlien(j);
-					if (alien->getType() == ALIEN_DEAD)
-						continue;
-
-					alienToMoveDown->setY(alienToMoveDown->getY() - 5);
-				}
-				alienMovementDirection *= -1;
-				break;
-			}
-			else
-			{
-				alien->setX(alien->getX() + alienMovementDirection);
-			}
-
-		}
-
+		game->moveAliens(currentFrame);
 		
 
 	}
@@ -728,9 +327,6 @@ int main() {
 	glfwDestroyWindow(window);
 	glfwTerminate();
 
-	
-	delete[] deathCounters;
-	delete playerSprite;
 	delete buffer;
 	delete game;
 	return 0;
